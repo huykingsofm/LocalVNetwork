@@ -100,7 +100,7 @@ class ForwardNode(LocalNode):
         self.__print__ = StandardPrint(f"From forwarder {self.name}", verbosities)
         self.forward_process = threading.Event()
 
-    def serve(self):
+    def start(self):
         t1 = threading.Thread(target= self._wait_message_from_node)
         t1.setDaemon(True)
         t1.start()
