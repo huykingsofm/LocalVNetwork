@@ -90,7 +90,7 @@ class LocalNode(object):
             del self.buffer
 
 class ForwardNode(LocalNode):
-    def __init__(self, node: LocalNode, socket: STCPSocket, verbosities: tuple = ("error", )):
+    def __init__(self, node: LocalNode, socket: STCPSocket, name = None, verbosities: tuple = ("error", )):
         self.node = node
         self.remote_client = socket
         super().__init__(None)
