@@ -192,3 +192,54 @@ class Server:
             elif ...
 ```
 </details>
+
+# USAGE
+## LocalNode
+### ```def __init__(self, name: str = None)```
+
+Create a node in LocalVNetwork system.
+
+**Parameters**
+> `name`: the identifier of node, if `name` is `None`, a random name is assign to node.
+
+### ```def send(self, received_node_name: str, message: str)```
+Send a message to another `LocalNode`  
+**Parameters**
+> `received_node_name`: the identifier of received node.  
+
+> `message`: the a message send to a node
+
+**Return**  
+No return
+
+### ```def recv(self):```
+Receive a message from another node
+
+**Parameters**  
+No parameter
+
+**Return**  
+> `from_node`: source node of message  
+
+> `message`: received message
+
+## ForwardNode
+### ```def __init__(self, node: LocalNode, socket: STCPSocket, name:str = None, verbosities: tuple = ("error", ))```
+Connect a `LocalNode` and a `STCPSocket` together and create a forwarder.  
+**Parameters**
+> `node`: the `LocalNode`  
+
+> `socket`: the `STCPSocket`  
+
+> `name`: identifier of `ForwardNode`, same the `LocalNode`  
+
+> `verbosities`: the tuple which each element is in `"error"`, `"warning"` or `"notification"`
+
+### ```def start(self)```
+Start the forwarder
+
+**Parameters**  
+No parameter
+
+**Return**  
+No return
