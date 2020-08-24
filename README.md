@@ -195,6 +195,7 @@ class Server:
 
 # USAGE
 ## LocalNode
+### @Constructor
 ```Py
 def __init__(self, name: str = None)
 ```
@@ -203,6 +204,7 @@ Create a node in LocalVNetwork system.
 **Parameters**
 * `name`: the identifier of node, if `name` is `None`, a random name is assign to node.
 
+### @Method
 ```Py
 def send(self, received_node_name: str, message: str)
 ```
@@ -216,6 +218,7 @@ Send a message to another `LocalNode`
 **Return**  
 No return
 
+### @Method
 ```Py
 def recv(self)
 ```
@@ -230,10 +233,11 @@ No parameter
 * `message`: received message
 
 ## ForwardNode
+### @Contructor
 ```Py
 def __init__(self, node: LocalNode, socket: STCPSocket, name:str = None, verbosities: tuple = ("error", ))
 ```
-Connect a `LocalNode` and a `STCPSocket` together and create a forwarder.  
+Create the channel between a `LocalNode` and a `STCPSocket` and forward them each other.  
 
 **Parameters**
 * `node`: the `LocalNode`  
@@ -243,7 +247,7 @@ Connect a `LocalNode` and a `STCPSocket` together and create a forwarder.
 * `name`: identifier of `ForwardNode`, same the `LocalNode`  
 
 * `verbosities`: the tuple which each element is in `"error"`, `"warning"` or `"notification"`
-
+### @Method
 ```Py 
 def start(self)
 ```
