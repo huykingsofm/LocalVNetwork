@@ -93,7 +93,7 @@ class ForwardNode(LocalNode):
     def __init__(self, node: LocalNode, socket: STCPSocket, name = None, verbosities: tuple = ("error", )):
         self.node = node
         self.remote_client = socket
-        super().__init__(None)
+        super().__init__(name)
         if verbosities == None:
             verbosities = socket.__print__.verbosities
     
