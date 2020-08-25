@@ -20,9 +20,9 @@ class _Cipher(object):
 
     def reset_key(self, newkey:bytes) -> bool:
         raise NotImplementedError
-    def encrypt(self, plaintext: bytes) -> bytes: 
+    def encrypt(self, plaintext: bytes, finalize = True) -> bytes: 
         raise NotImplementedError
-    def decrypt(self, plaintext: bytes) -> bytes:
+    def decrypt(self, plaintext: bytes, finalize = True) -> bytes:
         raise NotImplementedError
     def set_param(self, index: int, value: bytes) -> None:
         raise NotImplementedError
@@ -37,10 +37,10 @@ class NoCipher(_Cipher):
         # Do nothing
         return True
 
-    def encrypt(self, plaintext):
+    def encrypt(self, plaintext, finalize = True):
         return plaintext
 
-    def decrypt(self, ciphertext):
+    def decrypt(self, ciphertext, finalize = True):
         return ciphertext
 
     def set_param(self, index, value):
@@ -62,13 +62,13 @@ class XorCipher(_Cipher):
 
         super().__init__(key, 1)        
         
-    def reset_key(self, newkey: bytes):
+    def reset_key(self, newkey: bytes, finalize = True):
         if not isinstance(newkey, bytes) or len(newkey) != 1:
             raise InvalidArgument("Key of XorCipher must a bytes object of length 1")
 
         self.key = newkey[0]
 
-    def encrypt(self, plaintext: bytes) -> bytes:
+    def encrypt(self, plaintext: bytes, finalize = True) -> bytes:
         if not isinstance(plaintext, bytes):
             raise InvalidArgument("Plain text must be a bytes object")
 
@@ -81,7 +81,7 @@ class XorCipher(_Cipher):
 
         return ciphertext
 
-    def decrypt(self, ciphertext: bytes) -> bytes:
+    def decrypt(self, ciphertext: bytes, finalize = True) -> bytes:
         if not isinstance(ciphertext, bytes):
             raise InvalidArgument("Cipher text must be a bytes object")
 
@@ -122,7 +122,7 @@ class AES_CTR(_Cipher):
             raise InvalidArgument("Key size of AES must be in {128, 192, 256, 512}")
         self.key = newkey
 
-    def encrypt(self, plaintext: bytes) -> bytes:
+    def encrypt(self, plaintext: bytes, finalize = True) -> bytes:
         if not isinstance(plaintext, bytes):
             raise InvalidArgument("Plain text must be a bytes object")
 
@@ -130,13 +130,14 @@ class AES_CTR(_Cipher):
             raise EncryptFailed("Nonce has not been set yet")
         try:
             ciphertext = self.encryptor.update(plaintext)
-            ciphertext += self.encryptor.finalize()
+            if finalize:
+                ciphertext += self.encryptor.finalize()
         except:
             raise EncryptFailed("Don't reuse nonce value again")
 
         return ciphertext
 
-    def decrypt(self, ciphertext: bytes) -> bytes:
+    def decrypt(self, ciphertext: bytes, finalize = True) -> bytes:
         if not isinstance(ciphertext, bytes):
             raise InvalidArgument("Cipher text must be a bytes object")
 
@@ -144,7 +145,8 @@ class AES_CTR(_Cipher):
             raise EncryptFailed("Nonce has not been set yet")
         try:
             plaintext = self.decryptor.update(ciphertext)
-            plaintext += self.decryptor.finalize()
+            if finalize:
+                plaintext += self.decryptor.finalize()
         except:
             raise EncryptFailed("Don't reuse nonce value again")
 
@@ -187,14 +189,14 @@ class SimpleSSL(_Cipher):
     def reset_key(self, newkey: bytes):
         return self.cipher.reset_key(newkey)
 
-    def encrypt(self, plaintext: bytes) -> bytes:
+    def encrypt(self, plaintext: bytes, finalize = True) -> bytes:
         hashvalue = self.hashfunc(plaintext).digest()
         
         authenticated_plaintext = plaintext + hashvalue
-        return self.cipher.encrypt(authenticated_plaintext)
+        return self.cipher.encrypt(authenticated_plaintext, finalize)
 
-    def decrypt(self, ciphertext: bytes) -> bytes:
-        authenticated_plaintext = self.cipher.decrypt(ciphertext)
+    def decrypt(self, ciphertext: bytes, finalize = True) -> bytes:
+        authenticated_plaintext = self.cipher.decrypt(ciphertext, finalize)
         plaintext = authenticated_plaintext[:-self.digest_length]
         hashvalue = authenticated_plaintext[-self.digest_length:]
         if self.hashfunc(plaintext).digest() == hashvalue:
@@ -235,7 +237,7 @@ for class_name in dir():
 
 
 if __name__ == "__main__":
-    from InitialKey import key1, key2
+    key1 = os.urandom(16)
     cipher = AES_CTR(key1)
     cipher.set_param(0, os.urandom(16))
     ssl = SimpleSSL(cipher)
@@ -244,6 +246,7 @@ if __name__ == "__main__":
     c = ssl.decrypt(m)
     print(c)
 
+    key2 = os.urandom(16)
     ssl.set_param(0, os.urandom(16))
     ssl.reset_key(key2)
     m = (ssl.encrypt(b"123"))
