@@ -23,7 +23,7 @@ class LocalNode(object):
                 name = str(random.randint(1000000, 9999999))
 
         if name in LocalNode.node_names:
-            raise ChannelObjectExists("Name {} inuse".format(name))
+            raise ChannelObjectExists(f"Name {name} inuse")
 
         if len(LocalNode.nodes) >= MAX_NODES:
             raise ChannelFullSlots("No available slot in Local Node")
@@ -43,7 +43,7 @@ class LocalNode(object):
             slot_of_received_node_name = LocalNode.node_names.index(received_node_name)
             received_node = LocalNode.nodes[slot_of_received_node_name]
         except:
-            raise ChannelSlotError("No username is {}".format(received_node_name))
+            raise ChannelSlotError(f"No username is {received_node_name}")
             
         message = "from {}:{}".format(self.name, message)
         received_node.buffer.push(message)
@@ -111,8 +111,6 @@ class ForwardNode(LocalNode):
 
         self.forward_process.wait()
         self.close()
-        self.node.close()
-        self.remote_client.close()
         self.__print__(f"Stopped", "notification")
 
     def _wait_message_from_remote(self):
