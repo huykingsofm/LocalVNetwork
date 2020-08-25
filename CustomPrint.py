@@ -22,5 +22,5 @@ class CustomPrint(object):
         print(data)
 
 class StandardPrint(CustomPrint):
-    def __init__(self, prefix, verbosity):
-        super().__init__(prefix, ["error", "warning", "notification"], verbosity)
+    def __init__(self, prefix, verbosities):
+        super().__init__(prefix, ["error", "warning", "notification"], verbosities)
