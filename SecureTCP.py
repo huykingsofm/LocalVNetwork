@@ -121,7 +121,7 @@ class STCPSocket(object):
         server.setDaemon(True)
         server.start()
 
-        self.buffer = PacketBuffer(self.packet_decoder, address, self.__print__.verbosities)
+        self.buffer = PacketBuffer(self.packet_decoder, address, ("error", ))
         self.__print__.prefix = f"STCP Socket {address}"
         return ret
 
@@ -137,7 +137,7 @@ class STCPSocket(object):
         dtp = STCPSocket(cipher, self.buffer_size, self.__print__.verbosities)
         dtp.socket = socket
         dtp.__print__.prefix = f"STCP Socket {address}"
-        dtp.buffer = PacketBuffer(dtp.packet_decoder, address, dtp.__print__.verbosities)
+        dtp.buffer = PacketBuffer(dtp.packet_decoder, address, ("error", ))
         if start_serve:
             server = threading.Thread(target= dtp._start_serve)
             server.setDaemon(True)
