@@ -40,7 +40,6 @@ class STCPSocket(object):
             except socket.error as e:
                 self.close()
                 if e.errno == errno.ECONNRESET:
-                    self.__print__(repr(e), "warning")
                     break
                 else:
                     self.__print__(repr(e), "error")

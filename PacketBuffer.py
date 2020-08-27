@@ -22,6 +22,9 @@ class PacketBuffer():
 
     def pop(self):
         try:
+            if len(self.buffer) == 0:
+                return b""
+                
             self.current_packet += self.buffer[0]
             del self.buffer[0]
 

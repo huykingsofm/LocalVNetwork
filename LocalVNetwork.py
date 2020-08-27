@@ -1,10 +1,11 @@
 import re
 import time
+import errno
 import threading
 import random
 from CustomPrint import StandardPrint
 from PacketBuffer import PacketBuffer
-from SecureTCP import STCPSocket
+from SecureTCP import STCPSocket, STCPSocketClosed
 from DefinedError import InvalidArgument
 
 class ChannelException(Exception): ...
@@ -124,8 +125,10 @@ class ForwardNode(LocalNode):
         while not self._closed:
             try:
                 data = self.remote_client.recv()
+            except STCPSocketClosed:
+                break
             except Exception as e:
-                self.__print__(repr(e), "warning")
+                self.__print__(repr(e), "error")
                 break
             if data:
                 super().send(self.node.name, data)    
@@ -137,6 +140,8 @@ class ForwardNode(LocalNode):
         while not self._closed:
             try:
                 _, data = super().recv()
+            except AttributeError as e: # after close forwarder, it dont have buffer attribute --> error
+                break
             except Exception as e:
                 self.__print__(repr(e), "warning")
                 break
