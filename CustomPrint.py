@@ -18,7 +18,7 @@ class CustomPrint(object):
             return
 
         if self.prefix:
-            data = f"{self.prefix}: {data}"
+            data = f"{print_type} from {self.prefix}: {data}"
         print(data)
 
 class StandardPrint(CustomPrint):

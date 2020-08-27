@@ -1,5 +1,6 @@
 import socket
 import threading
+import errno
 import copy
 import time
 import Cipher
@@ -21,7 +22,7 @@ class STCPSocket(object):
         self.packet_decoder = SecurePacket.SecurePacketDecoder(self.cipher)
         self.buffer = None
         self.buffer_size = buffer_size
-        self.__print__ = StandardPrint(f"From STCP Socket", verbosities)
+        self.__print__ = StandardPrint(f"STCP Socket", verbosities)
 
         self.process = threading.Event()
 
@@ -36,10 +37,18 @@ class STCPSocket(object):
         while not self.isclosed():
             try:
                 data = self.socket.recv(self.buffer_size)
-            except Exception as e:
-                self.__print__(repr(e), "error")
+            except socket.error as e:
                 self.close()
-                break
+                if e.errno == errno.ECONNRESET:
+                    self.__print__(repr(e), "warning")
+                    break
+                else:
+                    self.__print__(repr(e), "error")
+                    raise e
+            except Exception as e:
+                self.close()
+                self.__print__(repr(e), "error")
+                raise e
             else:
                 self.buffer.push(data)
                 self.process.set()
@@ -59,7 +68,7 @@ class STCPSocket(object):
                 data = self.buffer.pop()
             except Packet.CannotExtractPacket as e: 
                 # Not enough length of packet
-                self.__print__(repr(e), "error")
+                self.__print__(repr(e), "warning")
                 break
             except SecurePacket.CipherTypeMismatch as e: 
                 # Cipher's type mismatch
@@ -68,6 +77,9 @@ class STCPSocket(object):
             except Cipher.DecryptFailed as e: 
                 # Cannot decrypt the packet: authentication failed, wrong parameters, ...
                 self.__print__(repr(e), "warning")
+                break
+            except Exception as e:
+                self.__print__(repr(e), "error")
                 break
             finally:
                 if not data:
@@ -111,7 +123,7 @@ class STCPSocket(object):
         server.start()
 
         self.buffer = PacketBuffer(self.packet_decoder, address, self.__print__.verbosities)
-        self.__print__.prefix = f"From STCP Socket {address}"
+        self.__print__.prefix = f"STCP Socket {address}"
         return ret
 
     def close(self):
@@ -125,7 +137,7 @@ class STCPSocket(object):
         cipher = copy.copy(self.cipher)
         dtp = STCPSocket(cipher, self.buffer_size, self.__print__.verbosities)
         dtp.socket = socket
-        dtp.__print__.prefix = f"From STCP Socket {address}"
+        dtp.__print__.prefix = f"STCP Socket {address}"
         dtp.buffer = PacketBuffer(dtp.packet_decoder, address, dtp.__print__.verbosities)
         if start_serve:
             server = threading.Thread(target= dtp._start_serve)

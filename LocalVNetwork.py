@@ -101,7 +101,7 @@ class ForwardNode(LocalNode):
         if verbosities == None:
             verbosities = socket.__print__.verbosities
     
-        self.__print__ = StandardPrint(f"From forwarder {self.name}", verbosities)
+        self.__print__ = StandardPrint(f"ForwardNode {self.name}", verbosities)
         self.forward_process = threading.Event()
 
     def start(self):
@@ -117,7 +117,7 @@ class ForwardNode(LocalNode):
         self.close()
         if self.node.process.is_set() == False:
             self.node.process.set()
-            
+
         self.__print__(f"Stopped", "notification")
 
     def _wait_message_from_remote(self):

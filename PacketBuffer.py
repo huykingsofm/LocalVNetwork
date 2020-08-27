@@ -10,9 +10,9 @@ class PacketBuffer():
     def __init__(self, decoder, identifier = None, verbosities: tuple = ("error", )):
         self.buffer = []
         self.packet_decoder = decoder
-        prefix = "From PacketBuffer"
+        prefix = "PacketBuffer"
         if identifier != None:
-            prefix = f"From PacketBuffer {identifier}"
+            prefix = f"PacketBuffer {identifier}"
         self.__print__ = StandardPrint(prefix, verbosities)
         self.current_packet = b""
 
@@ -47,7 +47,7 @@ class PacketBuffer():
         except Cipher.CipherException as e:
             raise e
         except Exception as e:
-            self.__print__(e, "warning")
+            self.__print__(e, "error")
             return b""
 
     def __len__(self):
