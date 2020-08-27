@@ -12,7 +12,7 @@ class STCPSocketException(Exception): ...
 class STCPSocketClosed(STCPSocketException): ...
 
 class STCPSocket(object):
-    def __init__(self, cipher = Cipher.NoCipher(), verbosities: tuple = ("error", )):
+    def __init__(self, cipher = Cipher.NoCipher(), buffer_size = 1024, verbosities: tuple = ("error", )):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.cipher = cipher
         self.cipher.reset_params()
@@ -20,7 +20,7 @@ class STCPSocket(object):
         self.packet_encoder = SecurePacket.SecurePacketEncoder(self.cipher)
         self.packet_decoder = SecurePacket.SecurePacketDecoder(self.cipher)
         self.buffer = None
-        self.buffer_size = Packet.MAX_LENGTH
+        self.buffer_size = buffer_size
         self.__print__ = StandardPrint(f"From STCP Socket", verbosities)
 
         self.process = threading.Event()
@@ -38,18 +38,18 @@ class STCPSocket(object):
                 data = self.socket.recv(self.buffer_size)
             except Exception as e:
                 self.__print__(repr(e), "error")
-                self.socket._closed = True
-                self.process.set()
+                self.close()
                 break
             else:
                 self.buffer.push(data)
                 self.process.set()
+        self.__print__("Stop serve socket...", "notification")
 
     def recv(self, reload_time = 0.3):
         data = b''
         n_try = 0
-        while data == b'':
-            if self.isclosed() and n_try > 3:
+        while not data:
+            if self.isclosed() and n_try >= 3:
                 raise STCPSocketClosed("Connection closed")
 
             if len(self.buffer) == 0 and self.isclosed() == False:
@@ -70,7 +70,8 @@ class STCPSocket(object):
                 self.__print__(repr(e), "warning")
                 break
             finally:
-                time.sleep(reload_time)
+                if not data:
+                    time.sleep(reload_time)
 
             n_try += 1
 
@@ -114,6 +115,7 @@ class STCPSocket(object):
         return ret
 
     def close(self):
+        self.process.set()
         return self.socket.close()
 
     def isclosed(self):
@@ -121,7 +123,7 @@ class STCPSocket(object):
     
     def _fromsocket(self, socket: socket.socket, address, start_serve = True):
         cipher = copy.copy(self.cipher)
-        dtp = STCPSocket(cipher, self.__print__.verbosities)
+        dtp = STCPSocket(cipher, self.buffer_size, self.__print__.verbosities)
         dtp.socket = socket
         dtp.__print__.prefix = f"From STCP Socket {address}"
         dtp.buffer = PacketBuffer(dtp.packet_decoder, address, dtp.__print__.verbosities)

@@ -49,7 +49,7 @@ class SecurePacketDecoder(PacketDecoder):
         packet_dict = super().__call__(packet)
         
         # ORIGINAL HEADER = HEADER_SIZE (2 bytes) + PAYLOAD_SIZE (2 byte)
-        original_header_size = 4
+        original_header_size = 6
         
         # SECURE HEADER: TYPE_OF_CIPHER (2 bytes) + NUMBER_OF_PARAMS(1 byte) 
         #                 + PARAM1_SIZE + PARAM1 + PARAM2_SIZE + PARAM2 + ...

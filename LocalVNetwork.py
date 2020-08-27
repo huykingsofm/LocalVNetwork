@@ -5,6 +5,7 @@ import random
 from CustomPrint import StandardPrint
 from PacketBuffer import PacketBuffer
 from SecureTCP import STCPSocket
+from DefinedError import InvalidArgument
 
 class ChannelException(Exception): ...
 class ChannelSlotError(ChannelException): ...
@@ -36,6 +37,9 @@ class LocalNode(object):
         self._closed = False
 
     def send(self, received_node_name, message):
+        if isinstance(message, bytes) == False:
+            raise InvalidArgument("Message must be a bytes object")
+
         if self._closed:
             raise ChannelClosed("Channel closed")
         
@@ -45,7 +49,7 @@ class LocalNode(object):
         except:
             raise ChannelSlotError(f"No username is {received_node_name}")
             
-        message = "from {}:{}".format(self.name, message)
+        message = "from {}:".format(self.name).encode() + message
         received_node.buffer.push(message)
         received_node.process.set()
 
@@ -62,7 +66,7 @@ class LocalNode(object):
 
             message = self.buffer.pop()
             if message:
-                match = re.match(r"^from (\w+):(.+)", message)
+                match = re.match(r"^from (\w+):(.+)", message.decode())
                 if match == None:
                     raise ChannelMessageFormatError("Message format is wrong")
 
@@ -77,7 +81,7 @@ class LocalNode(object):
         if message == None and self._closed and n_try == 0:
             raise ChannelClosed("Channel closed")
 
-        return from_user, message
+        return from_user, message.encode()
 
     def close(self):
         if not self._closed:
@@ -111,12 +115,15 @@ class ForwardNode(LocalNode):
 
         self.forward_process.wait()
         self.close()
+        if self.node.process.is_set() == False:
+            self.node.process.set()
+            
         self.__print__(f"Stopped", "notification")
 
     def _wait_message_from_remote(self):
         while not self._closed:
             try:
-                data = self.remote_client.recv().decode()
+                data = self.remote_client.recv()
             except Exception as e:
                 self.__print__(repr(e), "warning")
                 break
@@ -134,7 +141,7 @@ class ForwardNode(LocalNode):
                 self.__print__(repr(e), "warning")
                 break
             if data:
-                self.remote_client.send(data.encode())
+                self.remote_client.send(data)
 
         self.forward_process.set()
         self.__print__("Waiting from node ended", "notification")
