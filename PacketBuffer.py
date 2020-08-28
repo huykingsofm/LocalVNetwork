@@ -43,15 +43,8 @@ class PacketBuffer():
 
             self.current_packet = b""
             return packet_tuple["payload"]
-        except SecurePacket.SecurePacketException as e:
-            raise e
-        except Packet.PacketException as e:
-            raise e
-        except Cipher.CipherException as e:
-            raise e
         except Exception as e:
-            self.__print__(e, "error")
-            return b""
+            raise e
 
     def __len__(self):
         return len(self.buffer)
