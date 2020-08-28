@@ -1,7 +1,7 @@
 import struct
-from Packet import PacketEncoder, PacketDecoder
-from Cipher import XorCipher, cipher_from_hash, hash_name
-from DefinedError import InvalidArgument
+from .Packet import PacketEncoder, PacketDecoder
+from .Cipher import XorCipher, cipher_from_hash, hash_name
+from .DefinedError import InvalidArgument
 
 class SecurePacketException(Exception): ...
 class CipherTypeMismatch(SecurePacketException): ...
@@ -72,13 +72,3 @@ class SecurePacketDecoder(PacketDecoder):
             
         packet_dict["payload"] = self.cipher.decrypt(packet_dict["payload"])
         return packet_dict
-
-if __name__ == "__main__":
-    cipher = XorCipher(key = b'1')
-    cipher.set_param(0, b'3')
-    packet_encoder = SecurePacketEncoder(cipher)
-    m = packet_encoder("huythongminh".encode())
-    print(m)
-
-    packet_decoder = SecurePacketDecoder(cipher)
-    print(packet_decoder(m))

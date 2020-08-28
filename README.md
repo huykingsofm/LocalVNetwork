@@ -193,6 +193,35 @@ class Server:
 ```
 </details>
 
+# TESTING
+```bash
+# Step 1
+$ git clone https://github.com/huykingsofm/LocalVNetwork
+
+# Step 2
+Let's move or copy __server__.py and __client__.py from LocalVNetwork to current directory
+Example:
+Before moving
+    -- CurrentFolder/
+    ------ LocalVNetwork/
+    ---------- __server__.py
+    ---------- __client__.py
+    ---------- otherfiles...
+After moving
+    -- CurrentFolder/
+    ------ __server__.py
+    ------ __client__.py
+    ------ LocalVNetwork/
+    ---------- otherfiles...
+
+# Step 3
+$ python __server__.py
+
+# Step 4
+$ python __client__.py
+
+```
+
 # USAGE
 ## LocalNode
 ### @Constructor

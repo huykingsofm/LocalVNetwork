@@ -1,4 +1,4 @@
-from DefinedError import InvalidArgument
+from .DefinedError import InvalidArgument
 
 class CustomPrint(object):
     def __init__(self, prefix, print_type_array, verbosities):

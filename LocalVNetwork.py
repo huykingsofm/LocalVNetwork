@@ -3,10 +3,10 @@ import time
 import errno
 import threading
 import random
-from CustomPrint import StandardPrint
-from PacketBuffer import PacketBuffer
-from SecureTCP import STCPSocket, STCPSocketClosed
-from DefinedError import InvalidArgument
+from .CustomPrint import StandardPrint
+from .PacketBuffer import PacketBuffer
+from .SecureTCP import STCPSocket, STCPSocketClosed
+from .DefinedError import InvalidArgument
 
 class ChannelException(Exception): ...
 class ChannelSlotError(ChannelException): ...
@@ -156,7 +156,3 @@ class ForwardNode(LocalNode):
 
     def recv(self):
         raise NotImplementedError
-    
-if __name__ == "__main__":
-    # Test your code
-    pass

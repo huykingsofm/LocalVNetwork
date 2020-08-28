@@ -3,7 +3,7 @@ import os
 import hashlib
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
-from DefinedError import InvalidArgument
+from .DefinedError import InvalidArgument
 
 class CipherException(Exception): ...
 
@@ -234,22 +234,3 @@ for class_name in dir():
             cipher_from_hash[hash_name(_class)] = _class
     except Exception as e:
         continue
-
-
-if __name__ == "__main__":
-    key1 = os.urandom(16)
-    cipher = AES_CTR(key1)
-    cipher.set_param(0, os.urandom(16))
-    ssl = SimpleSSL(cipher)
-    m = (ssl.encrypt(b"123"))
-    print(m)
-    c = ssl.decrypt(m)
-    print(c)
-
-    key2 = os.urandom(16)
-    ssl.set_param(0, os.urandom(16))
-    ssl.reset_key(key2)
-    m = (ssl.encrypt(b"123"))
-    print(m)
-    c = ssl.decrypt(m)
-    print(c)

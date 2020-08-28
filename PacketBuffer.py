@@ -1,7 +1,7 @@
-import SecurePacket
-import Packet
-import Cipher
-from CustomPrint import StandardPrint
+from . import SecurePacket
+from . import Packet
+from . import Cipher
+from .CustomPrint import StandardPrint
 
 class PacketBufferException(Exception): ...
 class PacketBufferOverflow(PacketBufferException): ...
@@ -55,29 +55,3 @@ class PacketBuffer():
 
     def __len__(self):
         return len(self.buffer)
-
-if __name__ == "__main__":
-    from SecurePacket import SecurePacketEncoder, SecurePacketDecoder
-    from Cipher import AES_CTR
-    import os
-    key = os.urandom(16)
-    cipher = AES_CTR(key)
-
-    packet_encoder = SecurePacketEncoder(cipher)
-    packet_decoder = SecurePacketDecoder(cipher)
-    packetbuffer = PacketBuffer(packet_decoder)
-
-    nonce = os.urandom(16)
-    cipher.set_param(0, nonce)
-    packetbuffer.push(packet_encoder(b"huythongminh"))
-    print("Buffer 1:", packetbuffer.buffer)
-
-    nonce = os.urandom(16)
-    cipher.set_param(0, nonce)
-    packetbuffer.push(packet_encoder(b"123"))
-    print("Buffer 2", packetbuffer.buffer)
-
-    print("Pop 1:", packetbuffer.pop())
-    print("Buffer 3:", packetbuffer.buffer)
-    print("Pop 2:", packetbuffer.pop())
-    print("Buffer 4:", packetbuffer.buffer)

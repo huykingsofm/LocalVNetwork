@@ -1,8 +1,8 @@
-from LocalVNetwork import LocalNode, ForwardNode, STCPSocket
+from LocalVNetwork.LocalVNetwork import LocalNode, ForwardNode, STCPSocket
 import threading
 
 if __name__ == "__main__":
-    server_socket = STCPSocket()
+    server_socket = STCPSocket(verbosities= ("error", "warning", "notification"))
     server_socket.bind(("127.0.0.1", 9999))
     server_socket.listen()
 
@@ -11,14 +11,17 @@ if __name__ == "__main__":
     server_node = LocalNode()
     print(f"server {server_node.name}")
     
-    forwarder = ForwardNode(server_node, client_socket, verbosities = ("error", "warning"))
+    forwarder = ForwardNode(server_node, client_socket, verbosities = ("error", "warning", "notification"))
     print(f"forwarder {forwarder.name}")
     
-    t = threading.Thread(target= forwarder.serve)
+    t = threading.Thread(target= forwarder.start)
     t.start()
 
     while True:
         try:
             print(server_node.recv())
-        except:
+            data = input(">>> ").encode()
+            server_node.send(forwarder.name, data)
+        except Exception as e:
+            print("Last: " + repr(e))
             break

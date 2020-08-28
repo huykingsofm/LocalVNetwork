@@ -3,11 +3,11 @@ import threading
 import errno
 import copy
 import time
-import Cipher
-import Packet
-import SecurePacket
-from PacketBuffer import PacketBuffer
-from CustomPrint import StandardPrint
+from . import Cipher
+from . import Packet
+from . import SecurePacket
+from .PacketBuffer import PacketBuffer
+from .CustomPrint import StandardPrint
 
 class STCPSocketException(Exception): ...
 class STCPSocketClosed(STCPSocketException): ...
@@ -143,14 +143,3 @@ class STCPSocket(object):
             server.setDaemon(True)
             server.start()
         return dtp
-
-
-if __name__ == "__main__":
-    a = STCPSocket()
-    a.bind(("127.0.0.1", 9999))
-    a.listen()
-    b, _ = a.accept()
-    print(b.recv())
-    b.close()
-    a.close()
-    

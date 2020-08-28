@@ -1,4 +1,4 @@
-from SecureTCP import STCPSocket
+from LocalVNetwork.SecureTCP import STCPSocket
 
 if __name__ == "__main__":
     remote_socket = STCPSocket()
@@ -6,3 +6,5 @@ if __name__ == "__main__":
     while True:
         data = input(">>> ")
         remote_socket.send(data.encode())
+        data = remote_socket.recv()
+        print(data)

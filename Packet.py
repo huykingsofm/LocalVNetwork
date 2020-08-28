@@ -1,5 +1,5 @@
 import struct
-from DefinedError import InvalidArgument
+from .DefinedError import InvalidArgument
 
 class PacketException(Exception): ...
 class CannotExtractPacket(PacketException): ...
@@ -55,11 +55,3 @@ class PacketDecoder:
         packet_dict["packet_size"] = header_size + payload_size
 
         return packet_dict
-
-if __name__ == "__main__":
-    packet_encoder = PacketEncoder()
-    m = packet_encoder("huythongminh".encode())
-    print(m)
-
-    packet_decoder = PacketDecoder()
-    print(packet_decoder(m))
