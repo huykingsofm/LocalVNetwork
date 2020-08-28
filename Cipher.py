@@ -62,7 +62,7 @@ class XorCipher(_Cipher):
 
         super().__init__(key, 1)        
         
-    def reset_key(self, newkey: bytes, finalize = True):
+    def reset_key(self, newkey: bytes):
         if not isinstance(newkey, bytes) or len(newkey) != 1:
             raise InvalidArgument("Key of XorCipher must a bytes object of length 1")
 
