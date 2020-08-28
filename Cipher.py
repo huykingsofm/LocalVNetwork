@@ -51,7 +51,7 @@ class NoCipher(_Cipher):
 
     def reset_params(self):
         #Do nothing
-        return True
+        pass
 
 class XorCipher(_Cipher):
     "Encrypt the payload using xor operator: c = p xor key"
