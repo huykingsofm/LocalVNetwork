@@ -199,7 +199,7 @@ class Server:
 $ git clone https://github.com/huykingsofm/LocalVNetwork
 
 # Step 2
-Let's move or copy __server__.py and __client__.py from LocalVNetwork to current directory
+Let\'s move or copy __server__.py and __client__.py from LocalVNetwork to current directory
 Example:
 Before moving
     -- CurrentFolder/
