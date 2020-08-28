@@ -194,7 +194,7 @@ class Server:
 </details>
 
 # TESTING
-```bash
+```
 # Step 1
 $ git clone https://github.com/huykingsofm/LocalVNetwork
 
@@ -202,13 +202,13 @@ $ git clone https://github.com/huykingsofm/LocalVNetwork
 # Let's move or copy __server__.py and __client__.py from LocalVNetwork to current directory
 # Example:
 # Before moving
-#    -- CurrentFolder/
+#    -- CurrentDir/
 #    ------ LocalVNetwork/
 #    ---------- __server__.py
 #    ---------- __client__.py
 #    ---------- otherfiles...
 # After moving
-#    -- CurrentFolder/
+#    -- CurrentDir/
 #    ------ __server__.py
 #    ------ __client__.py
 #    ------ LocalVNetwork/
@@ -222,7 +222,27 @@ $ python __client__.py
 ```
 
 # USAGE
+
+```
+$ git clone https://github.com/huykingsofm/LocalVNetwork
+# Your current working directory like as
+# -- CurrentDir/
+# ------ main.py
+# ------ LocalVNetwork/
+# ------ otherfiles.py
+```
+
+```Python
+# In main.py
+from LocalVNetwork import LocalNode, ForwardNode, STCPSocket
+# or
+from LocalVNetwork import * # See ./LocalVNetwork/__init__.py 
+```
+
 ## LocalNode
+<details> 
+<summary> Click to see details </summary>
+
 ### @Constructor
 ```Py
 def __init__(self, name: str = None)
@@ -236,31 +256,36 @@ Create a node in LocalVNetwork system.
 ```Py
 def send(self, received_node_name: str, message: str)
 ```
-Send a message to another `LocalNode`  
+Send a message to another `LocalNode`.  
 
 **Parameters**
 * `received_node_name`: the identifier of received node.  
 
-* `message`: the a message send to a node
+* `message`: the a message send to a node.
 
 **Return**  
-No return
+No return.
 
 ### @Method
 ```Py
 def recv(self)
 ```
-Receive a message from another node
+Receive a message from another node.
 
 **Parameters**  
-No parameter
+No parameter.
 
 **Return**  
-* `from_node`: source node of message  
+* `from_node`: source node of message.  
 
-* `message`: received message
+* `message`: received message.
+
+</details>
 
 ## ForwardNode
+<details> 
+<summary> Click to see details </summary>
+
 ### @Contructor
 ```Py
 def __init__(self, node: LocalNode, socket: STCPSocket, name:str = None, verbosities: tuple = ("error", ))
@@ -268,21 +293,192 @@ def __init__(self, node: LocalNode, socket: STCPSocket, name:str = None, verbosi
 Create the channel between a `LocalNode` and a `STCPSocket` and forward them each other.  
 
 **Parameters**
-* `node`: the `LocalNode`  
+* `node`: the `LocalNode`.  
 
-* `socket`: the `STCPSocket`  
+* `socket`: the `STCPSocket`.  
 
-* `name`: identifier of `ForwardNode`, same the `LocalNode`  
+* `name`: identifier of `ForwardNode`, same the `LocalNode`.  
 
-* `verbosities`: the tuple which each element is in `"error"`, `"warning"` or `"notification"`
+* `verbosities`: the tuple which each element is in `"error"`, `"warning"` or `"notification"`.
 ### @Method
 ```Py 
 def start(self)
 ```
-Start the forwarder
+Start the forwarder.
 
 **Parameters**  
-No parameter
+No parameter.
 
 **Return**  
-No return
+No return.
+
+</details>
+
+## STCPSocket
+A socket of Transport Control Protocol (TCP) with encrypted payload.  
+Almost all methods are the same with built-in `socket.socket`. 
+
+<details> 
+<summary> Click to see details </summary>
+
+### @Constructor
+```Py
+def __init__(self, cipher = Cipher.NoCipher(), buffer_size = 1024, verbosities: tuple = ("error", ))
+```
+**Parameters**
++ `cipher`: the object of subclass of [_Cipher](./Cipher.py).
++ `buffer_size`: the maximum size of received packet.
++ `verbosities`: the tuple which each element is in `"error"`, `"warning"` or `"notification"`.
+
+### @Method
+```Py
+def recv(self, reload_time = 0.3)
+```
+Receive a packet from remote
+
+**Parameters** 
++ `reload_time`: the time (in second) which the socket wait if no packet is in buffer currently.
+
+**Return**
+A bytes object as received packet.
+
+### @Methods
+```Py
+def send(self, data)
+```
+See [send](https://docs.python.org/3/library/socket.html#socket.socket.send).
+
+```Py
+def sendall(self, data)
+```
+See [sendall](https://docs.python.org/3/library/socket.html#socket.socket.sendall).
+
+```Py
+def bind(self, address)
+```
+See [bind](https://docs.python.org/3/library/socket.html#socket.socket.bind).
+
+```Py
+def listen(self)
+```
+See [listen](https://docs.python.org/3/library/socket.html#socket.socket.listen).  
+
+```Py
+def accept(self)
+```
+See [accept](https://docs.python.org/3/library/socket.html#socket.socket.accept).
+
+```Py
+def connect(self, address)
+```
+See [connect](https://docs.python.org/3/library/socket.html#socket.socket.connect). 
+
+```Py
+def close(self)
+```
+See [close](https://docs.python.org/3/library/socket.html#socket.socket.close).  
+
+</details>
+
+## _Cipher (and its subclass)
+Subclass of `_Cipher` are `NoCipher`, `XorCipher`, `AES_CTR` and `SimpleSSL`.
+
+<details>
+<summary> Click to see details </summary>
+
+### @Constructor
+```Py
+# NoCipher
+def __init__(self)
+```
+**Paramters**  
+Don't pass any parameter
+
+```Py
+# XorCipher and AES_CTR
+def __init__(self, key)
+```
+**Parameters**
++ `key`: the key of cipher.
+
+```Py
+# SimpleSSL
+def __init__(self, cipher, hash_func)
+```
+**Parameters**
++ `cipher`: the object of subclass of `_Cipher` (except this class).
++ `hash_func`: the class in module `hashlib`.
+
+### @Method
+```Py
+def reset_key(self, newkey)
+```
+Reset the key of cipher.  
+**Paramters**
++ `newkey`: newkey of that cipher in bytes object.
+
+**Return**  
+No return.
+
+### @Method
+```Py
+def encrypt(self, plaintext, finalize = True)
+```
+Encrypt plaintext.  
+**Parameters**
++ `plaintext`: the plaintext in bytes object.
++ `finalize`: finish the encrypt process (add padding or something, corresponding to cipher type).
+
+**Return**  
+The ciphertext in bytes object.
+
+### @Method
+```Py
+def decrypt(self, ciphertext, finalize = True)
+```
+Decrypt cipher.  
+**Parameters**
++ `ciphertext`: the ciphertext in bytes object.
++ `finalize`: finish the decrypt process (remove padding or something, corresponding to cipher type).
+
+**Return**  
+The plaintext in bytes object.
+
+### @Method
+```Py
+def set_param(self, index, value)
+```
+Set a parameter of cipher.  
+In example, the only paramter of AES_CTR is nonce value.  
+
+**Paramters**
++ `index`: index of this parameter.
++ `value`: value of this parameter in bytes object.
+
+**Return**  
+No return.
+
+### @Method
+```Py
+def get_param(self, index, value)
+```
+Get a parameter of cipher.  
+
+**Paramters**
++ `index`: index of this parameter.
+
+**Return**  
+The value of this paramter in bytes object.
+
+### @Method
+```Py
+def reset_params(self)
+```
+Reset all parameters of cipher.  
+**Paramters**  
+No parameter.
+
+**Return**  
+No return.
+
+</details>
