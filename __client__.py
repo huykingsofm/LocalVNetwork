@@ -1,4 +1,4 @@
-from LocalVNetwork.SecureTCP import STCPSocket
+from LocalVNetwork import STCPSocket
 
 if __name__ == "__main__":
     remote_socket = STCPSocket()

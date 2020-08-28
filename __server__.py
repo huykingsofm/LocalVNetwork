@@ -1,4 +1,4 @@
-from LocalVNetwork.LocalVNetwork import LocalNode, ForwardNode, STCPSocket
+from LocalVNetwork import LocalNode, ForwardNode, STCPSocket
 import threading
 
 if __name__ == "__main__":
