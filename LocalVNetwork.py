@@ -56,7 +56,10 @@ class LocalNode(object):
         self.__process__ = threading.Event()
         self._closed = False
 
-    def send(self, destination_name, message, obj = None):
+    def send(self, destination_name: str, message: bytes, obj = None):
+        if isinstance(message, bytes) == False:
+            raise InvalidArgument("Message must be a bytes object")
+
         if self._closed:
             raise ChannelClosed("Channel closed")
         
