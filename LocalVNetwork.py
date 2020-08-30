@@ -15,6 +15,27 @@ class ChannelObjectExists(ChannelException): ...
 class ChannelMessageFormatError(ChannelException): ...
 class ChannelClosed(ChannelException): ...
 
+class AnythingBuffer(object):
+    def __init__(self, verbosities = ("error", )):
+        self.__buffer__ = []
+        self.__print__ = StandardPrint("Anything Buffer", verbosities)
+
+    def push(self, source, data):
+        self.__print__("Push from {}: {}".format(source, data), "notification")
+        self.__buffer__.append({"source": source, "data": data})
+
+    def pop(self):
+        if len(self.__buffer__) == 0:
+            return None, None
+
+        msg = self.__buffer__[0]
+        del self.__buffer__[0]
+
+        return msg["source"], msg["data"]    
+
+    def __len__(self):
+        return len(self.__buffer__)
+
 MAX_NODES = 8
 class LocalNode(object):
     nodes = []
@@ -33,66 +54,45 @@ class LocalNode(object):
         LocalNode.node_names.append(name)
         LocalNode.nodes.append(self)
         self.name = name
-        self.buffer = PacketBuffer(decoder= None)
-        self.process = threading.Event()
+        self.__buffer__ = AnythingBuffer()
+        self.__process__ = threading.Event()
         self._closed = False
 
-    def send(self, received_node_name, message):
-        if isinstance(message, bytes) == False:
-            raise InvalidArgument("Message must be a bytes object")
-
+    def send(self, received_node_name, data):
         if self._closed:
             raise ChannelClosed("Channel closed")
         
         try:
             slot_of_received_node_name = LocalNode.node_names.index(received_node_name)
-            received_node = LocalNode.nodes[slot_of_received_node_name]
+            received_node: LocalNode = LocalNode.nodes[slot_of_received_node_name]
         except:
             raise ChannelSlotError(f"No username is {received_node_name}")
             
-        message = "from {}:".format(self.name).encode() + message
-        received_node.buffer.push(message)
-        received_node.process.set()
+        received_node.__buffer__.push(self.name, data)
+        received_node.__process__.set()
 
     def recv(self, reload_time = 0.3):
         if self._closed:
             raise ChannelClosed("Channel closed")
         
-        n_try = 3
-        from_user = None
-        message = None
-        while n_try > 0:
-            if len(self.buffer) == 0 and not self._closed:
-                self.process.wait()
-
-            message = self.buffer.pop()
-            if message:
-                match = re.match(r"^from (\w+):(.+)", message.decode())
-                if match == None:
-                    raise ChannelMessageFormatError("Message format is wrong")
-
-                from_user = match.group(1)
-                message = match.group(2)
-                break
-            else:
-                n_try -= 1
-                time.sleep(reload_time)
-
-        self.process.clear()
-        if message == None and self._closed and n_try == 0:
+        if len(self.__buffer__) == 0 and not self._closed:
+            self.__process__.wait()
+        self.__process__.clear()
+        
+        if self._closed:
             raise ChannelClosed("Channel closed")
-
-        return from_user, message.encode()
+        
+        return self.__buffer__.pop()
 
     def close(self):
         if not self._closed:
-            self.process.set()
             self._closed = True
+            self.__process__.set()
             my_slot = LocalNode.node_names.index(self.name)
             del LocalNode.node_names[my_slot]
             del LocalNode.nodes[my_slot]
             self.name = None
-            del self.buffer
+            del self.__buffer__
 
 class ForwardNode(LocalNode):
     def __init__(self, node: LocalNode, socket: STCPSocket, name = None, verbosities: tuple = ("error", )):
@@ -116,8 +116,8 @@ class ForwardNode(LocalNode):
 
         self.forward_process.wait()
         self.close()
-        if self.node.process.is_set() == False:
-            self.node.process.set()
+        if self.node.__process__.is_set() == False:
+            self.node.__process__.set()
 
         self.__print__(f"Stopped", "notification")
 
