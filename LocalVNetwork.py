@@ -16,22 +16,20 @@ class ChannelMessageFormatError(ChannelException): ...
 class ChannelClosed(ChannelException): ...
 
 class AnythingBuffer(object):
-    def __init__(self, verbosities = ("error", )):
+    def __init__(self):
         self.__buffer__ = []
-        self.__print__ = StandardPrint("Anything Buffer", verbosities)
 
-    def push(self, source, data):
-        self.__print__("Push from {}: {}".format(source, data), "notification")
-        self.__buffer__.append({"source": source, "data": data})
+    def push(self, source, message, obj = None):
+        self.__buffer__.append({"source": source, "message": message, "obj": obj})
 
     def pop(self):
         if len(self.__buffer__) == 0:
-            return None, None
+            return None, None, None
 
-        msg = self.__buffer__[0]
+        packet = self.__buffer__[0]
         del self.__buffer__[0]
 
-        return msg["source"], msg["data"]    
+        return packet["source"], packet["message"], packet["obj"]
 
     def __len__(self):
         return len(self.__buffer__)
@@ -58,7 +56,7 @@ class LocalNode(object):
         self.__process__ = threading.Event()
         self._closed = False
 
-    def send(self, destination_name, data):
+    def send(self, destination_name, message, obj = None):
         if self._closed:
             raise ChannelClosed("Channel closed")
         
@@ -68,7 +66,7 @@ class LocalNode(object):
         except:
             raise ChannelSlotError(f"No username is {destination_name}")
             
-        destination_node.__buffer__.push(self.name, data)
+        destination_node.__buffer__.push(self.name, message, obj)
         destination_node.__process__.set()
 
     def recv(self, reload_time = 0.3):
@@ -139,14 +137,14 @@ class ForwardNode(LocalNode):
     def _wait_message_from_node(self):
         while not self._closed:
             try:
-                _, data = super().recv()
+                _, message, _ = super().recv()
             except AttributeError as e: # after close forwarder, it dont have buffer attribute --> error
                 break
             except Exception as e:
                 self.__print__(repr(e), "warning")
                 break
-            if data:
-                self.remote_client.send(data)
+            if message:
+                self.remote_client.send(message)
 
         self.forward_process.set()
         self.__print__("Waiting from node ended", "notification")

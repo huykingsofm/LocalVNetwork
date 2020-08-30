@@ -254,14 +254,14 @@ Create a node in LocalVNetwork system.
 
 ### @Method
 ```Py
-def send(self, received_node_name: str, data)
+def send(self, received_node_name: str, message, obj = None)
 ```
 Send a message to another `LocalNode`.  
 
 **Parameters**
 * `received_node_name`: the identifier of received node.  
-
-* `data`: the sent data (any object).
+* `message`: the sent data in bytes object.
+* `obj`: the attach object.
 
 **Return**  
 No return.
@@ -277,8 +277,9 @@ No parameter.
 
 **Return**  
 A tuple contains:
-* `source`: source node's name of message.  
-* `data`: received object.
+* `source`: the source node's name of message.  
+* `message`: the received message.
+* `obj`: the attach object
 
 </details>
 
