@@ -58,18 +58,18 @@ class LocalNode(object):
         self.__process__ = threading.Event()
         self._closed = False
 
-    def send(self, received_node_name, data):
+    def send(self, destination_name, data):
         if self._closed:
             raise ChannelClosed("Channel closed")
         
         try:
-            slot_of_received_node_name = LocalNode.node_names.index(received_node_name)
-            received_node: LocalNode = LocalNode.nodes[slot_of_received_node_name]
+            slot_of_destination = LocalNode.node_names.index(destination_name)
+            destination_node: LocalNode = LocalNode.nodes[slot_of_destination]
         except:
-            raise ChannelSlotError(f"No username is {received_node_name}")
+            raise ChannelSlotError(f"No username is {destination_name}")
             
-        received_node.__buffer__.push(self.name, data)
-        received_node.__process__.set()
+        destination_node.__buffer__.push(self.name, data)
+        destination_node.__process__.set()
 
     def recv(self, reload_time = 0.3):
         if self._closed:
