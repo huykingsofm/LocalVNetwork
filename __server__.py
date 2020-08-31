@@ -11,7 +11,7 @@ if __name__ == "__main__":
     server_node = LocalNode()
     print(f"server {server_node.name}")
     
-    forwarder = ForwardNode(server_node, client_socket, verbosities = ("error", "warning", "notification"))
+    forwarder = ForwardNode(server_node, client_socket, implicated_die= True, verbosities = ("error", "warning", "notification"))
     print(f"forwarder {forwarder.name}")
     
     t = threading.Thread(target= forwarder.start)

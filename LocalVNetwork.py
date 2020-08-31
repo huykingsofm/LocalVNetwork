@@ -96,10 +96,18 @@ class LocalNode(object):
             del self.__buffer__
 
 class ForwardNode(LocalNode):
-    def __init__(self, node: LocalNode, socket: STCPSocket, name = None, verbosities: tuple = ("error", )):
+    def __init__(self, 
+        node: LocalNode, 
+        socket: STCPSocket, 
+        name = None, 
+        implicated_die = False, 
+        verbosities: tuple = ("error", )
+    ):
         self.node = node
         self.remote_client = socket
         super().__init__(name)
+    
+        self.implicated_die = implicated_die
         if verbosities == None:
             verbosities = socket.__print__.verbosities
     
@@ -117,8 +125,12 @@ class ForwardNode(LocalNode):
 
         self.forward_process.wait()
         self.close()
-        if self.node.__process__.is_set() == False:
-            self.node.__process__.set()
+        if self.implicated_die:
+            self.node.close()
+            self.remote_client.close()
+        else:
+            if self.node.__process__.is_set() == False:
+                self.node.__process__.set()
 
         self.__print__(f"Stopped", "notification")
 

@@ -289,17 +289,21 @@ A tuple contains:
 
 ### @Contructor
 ```Py
-def __init__(self, node: LocalNode, socket: STCPSocket, name:str = None, verbosities: tuple = ("error", ))
+def __init__(self, 
+    node: LocalNode, 
+    socket: STCPSocket, 
+    name:str = None, 
+    implicated_die = False, 
+    verbosities: tuple = ("error", )
+    )
 ```
 Create the channel between a `LocalNode` and a `STCPSocket` and forward them each other.  
 
 **Parameters**
 * `node`: the `LocalNode`.  
-
 * `socket`: the `STCPSocket`.  
-
-* `name`: identifier of `ForwardNode`, same the `LocalNode`.  
-
+* `name`: the identifier of `ForwardNode`, same the `LocalNode`.  
+* `implicated_die`: if node or socket dies, it will cause that another one dies too. If False, nothing happens.
 * `verbosities`: the tuple which each element is in `"error"`, `"warning"` or `"notification"`.
 ### @Method
 ```Py 
