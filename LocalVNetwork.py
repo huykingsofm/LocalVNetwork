@@ -5,7 +5,7 @@ import threading
 import random
 from .CustomPrint import StandardPrint
 from .PacketBuffer import PacketBuffer
-from .SecureTCP import STCPSocket, STCPSocketClosed
+from .SecureTCP import STCPSocket, STCPSocketClosed, RELOAD_TIME
 from .DefinedError import InvalidArgument
 
 class ChannelException(Exception): ...
@@ -22,12 +22,20 @@ class AnythingBuffer(object):
     def push(self, source, message, obj = None):
         self.__buffer__.append({"source": source, "message": message, "obj": obj})
 
-    def pop(self):
+    def pop(self, source = None):
         if len(self.__buffer__) == 0:
             return None, None, None
 
-        packet = self.__buffer__[0]
-        del self.__buffer__[0]
+        if source == None:
+            idx = 0
+        else:
+            for i, packet in enumerate(self.__buffer__):
+                if packet["source"] == source:
+                    idx = i
+                    break
+
+        packet = self.__buffer__[idx]
+        del self.__buffer__[idx]
 
         return packet["source"], packet["message"], packet["obj"]
 
@@ -72,7 +80,7 @@ class LocalNode(object):
         destination_node.__buffer__.push(self.name, message, obj)
         destination_node.__process__.set()
 
-    def recv(self, reload_time = 0.3):
+    def recv(self, source = None):
         if self._closed:
             raise ChannelClosed("Channel closed")
         
@@ -83,7 +91,7 @@ class LocalNode(object):
         if self._closed:
             raise ChannelClosed("Channel closed")
         
-        return self.__buffer__.pop()
+        return self.__buffer__.pop(source)
 
     def close(self):
         if not self._closed:
@@ -100,7 +108,8 @@ class ForwardNode(LocalNode):
         node: LocalNode, 
         socket: STCPSocket, 
         name = None, 
-        implicated_die = False, 
+        implicated_die = False,
+        reload_time = RELOAD_TIME,
         verbosities: tuple = ("error", )
     ):
         self.node = node

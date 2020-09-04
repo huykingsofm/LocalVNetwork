@@ -268,18 +268,18 @@ No return.
 
 ### @Method
 ```Py
-def recv(self)
+def recv(self, source = None)
 ```
 Receive a message from another node.
 
 **Parameters**  
-No parameter.
++ `source`: Receive from only specific node. If None, receive from all nodes.
 
 **Return**  
 A tuple contains:
-* `source`: the source node's name of message.  
+* `source`: the name of source node.  
 * `message`: the received message.
-* `obj`: the attach object
+* `obj`: the attach object.
 
 </details>
 
@@ -293,7 +293,8 @@ def __init__(self,
     node: LocalNode, 
     socket: STCPSocket, 
     name:str = None, 
-    implicated_die = False, 
+    implicated_die = False,
+    reload_time = RELOAD_TIME, 
     verbosities: tuple = ("error", )
     )
 ```
@@ -304,6 +305,7 @@ Create the channel between a `LocalNode` and a `STCPSocket` and forward them eac
 * `socket`: the `STCPSocket`.  
 * `name`: the identifier of `ForwardNode`, same the `LocalNode`.  
 * `implicated_die`: if node or socket dies, it will cause that another one dies too. If False, nothing happens.
+* `reload_time`: the time which forwarder will reload if an error appears in receiving packet at socket.
 * `verbosities`: the tuple which each element is in `"error"`, `"warning"` or `"notification"`.
 ### @Method
 ```Py 
@@ -337,7 +339,7 @@ def __init__(self, cipher = Cipher.NoCipher(), buffer_size = 1024, verbosities: 
 
 ### @Method
 ```Py
-def recv(self, reload_time = 0.3)
+def recv(self, reload_time = RELOAD_TIME)
 ```
 Receive a packet from remote
 

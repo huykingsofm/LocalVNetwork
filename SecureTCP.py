@@ -9,6 +9,8 @@ from . import SecurePacket
 from .PacketBuffer import PacketBuffer
 from .CustomPrint import StandardPrint
 
+RELOAD_TIME = 0.000001
+
 class STCPSocketException(Exception): ...
 class STCPSocketClosed(STCPSocketException): ...
 
@@ -53,7 +55,7 @@ class STCPSocket(object):
                 self.process.set()
         self.__print__("Stop serve socket...", "notification")
 
-    def recv(self, reload_time = 0.3):
+    def recv(self, reload_time = RELOAD_TIME):
         data = b''
         n_try = 0
         while not data:
