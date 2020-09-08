@@ -2,6 +2,7 @@ import struct
 import os
 import hashlib
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.backends import default_backend
 from .DefinedError import InvalidArgument
 
@@ -197,8 +198,10 @@ class AES_CBC(_Cipher):
         if not hasattr(self, "encryptor"):
             raise EncryptFailed("IV has not been set yet")
         try:
-            ciphertext = self.encryptor.update(plaintext)
+            padded_text = self.padder.update(plaintext)
+            ciphertext = self.encryptor.update(padded_text)
             if finalize:
+                padded_text += self.padder.finalize()
                 ciphertext += self.encryptor.finalize()
         except:
             raise EncryptFailed("Don't reuse iv value again")
@@ -212,9 +215,13 @@ class AES_CBC(_Cipher):
         if not hasattr(self, "decryptor"):
             raise EncryptFailed("IV has not been set yet")
         try:
-            plaintext = self.decryptor.update(ciphertext)
+            padded_text = self.decryptor.update(ciphertext)
             if finalize:
-                plaintext += self.decryptor.finalize()
+                padded_text += self.decryptor.finalize()
+            
+            plaintext = self.unpadder.update(padded_text)
+            if finalize:
+                plaintext += self.unpadder.finalize()
         except:
             raise EncryptFailed("Don't reuse iv value again")
 
@@ -232,6 +239,9 @@ class AES_CBC(_Cipher):
             aes = Cipher(algorithms.AES(self.key), modes.CBC(self.iv), default_backend())
             self.encryptor = aes.encryptor()
             self.decryptor = aes.decryptor()
+
+            self.padder = padding.PKCS7(128).padder()
+            self.unpadder = padding.PKCS7(128).unpadder()
         else:
             raise InvalidArgument("AES only use the iv value as its parameter")
 
