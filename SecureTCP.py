@@ -41,7 +41,7 @@ class STCPSocket(object):
                 data = self.socket.recv(self.buffer_size)
             except socket.error as e:
                 self.close()
-                if e.errno in (errno.ECONNRESET, errno.ECONNABORTED):
+                if e.errno in (errno.ECONNRESET, errno.ECONNABORTED, errno.ECONNREFUSED):
                     break
                 else:
                     self.__print__(repr(e), "error")
