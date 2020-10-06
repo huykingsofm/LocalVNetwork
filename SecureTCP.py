@@ -52,6 +52,7 @@ class STCPSocket(object):
                 raise e
             else:
                 if not data: # when be closed with linux-base machine, socket will receive infinite empty packet
+                    self.close()
                     break
                 self.buffer.push(data)
                 self.process.set()
