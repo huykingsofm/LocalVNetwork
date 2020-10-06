@@ -51,6 +51,8 @@ class STCPSocket(object):
                 self.__print__(repr(e), "error")
                 raise e
             else:
+                if not data: # when be closed with linux-base machine, socket will receive infinite empty packet
+                    break
                 self.buffer.push(data)
                 self.process.set()
         self.__print__("Stop serve socket...", "notification")

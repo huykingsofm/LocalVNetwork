@@ -34,6 +34,9 @@ class PacketBuffer():
                 ret = self.current_packet
                 self.current_packet = b""
                 return ret
+
+            if self.current_packet == b"":
+                return b""
                 
             packet_tuple = self.packet_decoder(self.current_packet)
             packet_size = packet_tuple["packet_size"]
