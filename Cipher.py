@@ -133,8 +133,8 @@ class AES_CTR(_Cipher):
             ciphertext = self.encryptor.update(plaintext)
             if finalize:
                 ciphertext += self.encryptor.finalize()
-        except:
-            raise EncryptFailed("Don't reuse nonce value again")
+        except Exception:
+            raise e
 
         return ciphertext
 
@@ -148,8 +148,8 @@ class AES_CTR(_Cipher):
             plaintext = self.decryptor.update(ciphertext)
             if finalize:
                 plaintext += self.decryptor.finalize()
-        except:
-            raise EncryptFailed("Don't reuse nonce value again")
+        except Exception as e:
+            raise e
 
         return plaintext
 
@@ -199,12 +199,14 @@ class AES_CBC(_Cipher):
             raise EncryptFailed("IV has not been set yet")
         try:
             padded_text = self.padder.update(plaintext)
-            ciphertext = self.encryptor.update(padded_text)
             if finalize:
                 padded_text += self.padder.finalize()
+            
+            ciphertext = self.encryptor.update(padded_text)
+            if finalize:
                 ciphertext += self.encryptor.finalize()
-        except:
-            raise EncryptFailed("Don't reuse iv value again")
+        except Exception as e:
+            raise e
 
         return ciphertext
 
@@ -222,8 +224,8 @@ class AES_CBC(_Cipher):
             plaintext = self.unpadder.update(padded_text)
             if finalize:
                 plaintext += self.unpadder.finalize()
-        except:
-            raise EncryptFailed("Don't reuse iv value again")
+        except Exception as e:
+            raise e
 
         return plaintext
 
