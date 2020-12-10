@@ -15,6 +15,8 @@ class PacketBuffer():
             prefix = f"PacketBuffer {identifier}"
         self.__print__ = StandardPrint(prefix, verbosities)
         self.current_packet = b""
+        self.current_packet_size = 0
+        self.expected_current_packet_size = 0
 
     def push(self, packet:bytes):
         self.__print__("Push the message: {}".format(packet), "notification")
@@ -24,15 +26,23 @@ class PacketBuffer():
         try:
             if len(self.buffer) == 0:
                 return b""
-                
+            
+            self.current_packet_size += len(self.buffer[0])
             self.current_packet += self.buffer[0]
             del self.buffer[0]
 
-            self.__print__("Pop the message: {}".format(self.current_packet), "notification")
+            if self.expected_current_packet_size == 0 and self.packet_decoder:
+                packet_dict = self.packet_decoder._decode_header(self.current_packet)
+                self.expected_current_packet_size = packet_dict["payload_size"] + packet_dict["header_size"]
+
+            if self.current_packet_size < self.expected_current_packet_size:
+                return b""
             
             if self.packet_decoder == None:
                 ret = self.current_packet
                 self.current_packet = b""
+                self.current_packet_size = 0
+                self.expected_current_packet_size = 0
                 return ret
 
             if self.current_packet == b"":
