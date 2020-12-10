@@ -46,6 +46,8 @@ class PacketBuffer():
                 return ret
 
             if self.current_packet == b"":
+                self.current_packet_size = 0
+                self.expected_current_packet_size = 0
                 return b""
                 
             packet_tuple = self.packet_decoder(self.current_packet)
@@ -55,6 +57,8 @@ class PacketBuffer():
                 raise PacketBufferOverflow("Received packet's length is larger than the expected size of packet")
 
             self.current_packet = b""
+            self.current_packet_size = 0
+            self.expected_current_packet_size = 0
             return packet_tuple["payload"]
         except Exception as e:
             raise e
