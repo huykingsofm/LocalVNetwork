@@ -36,7 +36,7 @@ class PacketBuffer():
                 self.expected_current_packet_size = packet_dict["payload_size"] + packet_dict["header_size"]
 
             if self.current_packet_size < self.expected_current_packet_size:
-                return b""
+                raise Packet.CannotExtractPacket("Incomplete packet")
             
             if self.packet_decoder == None:
                 ret = self.current_packet
