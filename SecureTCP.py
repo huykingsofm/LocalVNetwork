@@ -97,7 +97,7 @@ class STCPSocket(object):
     def send(self, data):
         self.cipher.reset_params()
         packet = self.packet_encoder(data)
-        self.__print__("notification", "Send: {}".format(packet))
+        self.__print__("notification", "Sent {} bytes".format(len(packet)))
         return self.socket.send(packet)
 
     def sendall(self, data):
