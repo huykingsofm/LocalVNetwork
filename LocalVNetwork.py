@@ -25,9 +25,8 @@ class AnythingBuffer(object):
         if len(self.__buffer__) == 0:
             return None, None, None
 
-        if source == None:
-            idx = 0
-        else:
+        idx = 0
+        if source != None:
             for i, packet in enumerate(self.__buffer__):
                 if packet["source"] == source:
                     idx = i
@@ -140,7 +139,7 @@ class ForwardNode(LocalNode):
             if self.node.__process__.is_set() == False:
                 self.node.__process__.set()
 
-        self.__print__("notification", f"Stopped")
+        self.__print__("user", "notification", "Stopped")
 
     def _wait_message_from_remote(self):
         while not self._closed:
@@ -149,13 +148,14 @@ class ForwardNode(LocalNode):
             except STCPSocketClosed:
                 break
             except Exception as e:
-                self.__print__("error", repr(e))
+                self.__print__("user", "error", "Unknown error")
+                self.__print__("dev", "error", repr(e))
                 break
             if data:
                 super().send(self.node.name, data)    
         
         self.forward_process.set()
-        self.__print__("notification", "Waiting from remote ended")
+        self.__print__("user", "notification", "Waiting from remote ended")
 
     def _wait_message_from_node(self):
         while not self._closed:
@@ -164,13 +164,14 @@ class ForwardNode(LocalNode):
             except AttributeError as e: # after close forwarder, it dont have buffer attribute --> error
                 break
             except Exception as e:
-                self.__print__("warning", repr(e))
+                self.__print__("user", "error", "Unknown error")
+                self.__print__("dev", "error", repr(e))
                 break
             if message:
                 self.remote_client.send(message)
 
         self.forward_process.set()
-        self.__print__("notification", "Waiting from node ended")
+        self.__print__("user", "notification", "Waiting from node ended")
 
     def send(self, received_node_name, message):
         raise NotImplementedError

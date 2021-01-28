@@ -19,7 +19,7 @@ class PacketBuffer():
         self.expected_current_packet_size = 0
 
     def push(self, packet:bytes):
-        self.__print__("notification", "Push the message: {}".format(packet))
+        self.__print__("dev", "notification", "Push {} bytes to buffer".format(len(packet)))
         self.buffer.append(packet)
 
     def pop(self):
