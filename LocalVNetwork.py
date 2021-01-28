@@ -6,7 +6,6 @@ import random
 from .CustomPrint import StandardPrint
 from .PacketBuffer import PacketBuffer
 from .SecureTCP import STCPSocket, STCPSocketClosed, RELOAD_TIME
-from .DefinedError import InvalidArgument
 
 class ChannelException(Exception): ...
 class ChannelSlotError(ChannelException): ...
@@ -66,7 +65,7 @@ class LocalNode(object):
 
     def send(self, destination_name: str, message: bytes, obj = None):
         if isinstance(message, bytes) == False:
-            raise InvalidArgument("Message must be a bytes object")
+            raise Exception("Message must be a bytes object")
 
         if self._closed:
             raise ChannelClosed("Channel closed")

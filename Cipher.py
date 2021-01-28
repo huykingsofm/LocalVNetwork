@@ -4,7 +4,6 @@ import hashlib
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.backends import default_backend
-from .DefinedError import InvalidArgument
 
 class CipherException(Exception): ...
 
@@ -45,10 +44,10 @@ class NoCipher(_Cipher):
         return ciphertext
 
     def set_param(self, index, value):
-        raise InvalidArgument("Index exceeds (NoCipher doesn't use any parameters")
+        raise Exception("Index exceeds (NoCipher doesn't use any parameters")
 
     def get_param(self, index):
-        raise InvalidArgument("Index exceeds (NoCipher doesn't use any parameters")
+        raise Exception("Index exceeds (NoCipher doesn't use any parameters")
 
     def reset_params(self):
         #Do nothing
@@ -58,20 +57,20 @@ class XorCipher(_Cipher):
     "Encrypt the payload using xor operator: c = p xor key"
     def __init__(self, key: bytes):
         if not isinstance(key, bytes) or len(key) != 1:
-            raise InvalidArgument("Key of XorCipher must a bytes object of length 1")
+            raise Exception("Key of XorCipher must a bytes object of length 1")
         key = key[0]
 
         super().__init__(key, 1)        
         
     def reset_key(self, newkey: bytes):
         if not isinstance(newkey, bytes) or len(newkey) != 1:
-            raise InvalidArgument("Key of XorCipher must a bytes object of length 1")
+            raise Exception("Key of XorCipher must a bytes object of length 1")
 
         self.key = newkey[0]
 
     def encrypt(self, plaintext: bytes, finalize = True) -> bytes:
         if not isinstance(plaintext, bytes):
-            raise InvalidArgument("Plain text must be a bytes object")
+            raise Exception("Plain text must be a bytes object")
 
         if not hasattr(self, "iv"):
             raise EncryptFailed("IV has not been set yet")
@@ -84,27 +83,27 @@ class XorCipher(_Cipher):
 
     def decrypt(self, ciphertext: bytes, finalize = True) -> bytes:
         if not isinstance(ciphertext, bytes):
-            raise InvalidArgument("Cipher text must be a bytes object")
+            raise Exception("Cipher text must be a bytes object")
 
         return self.encrypt(ciphertext)
 
     def set_param(self, index: int, value: bytes) -> None:
         if not isinstance(value, bytes):
-            raise InvalidArgument("Value must be a bytes object")
+            raise Exception("Value must be a bytes object")
 
         if index == 0:
             if len(value) != 1:
-                raise InvalidArgument("IV of XorCipher must be an 1-length bytes object")
+                raise Exception("IV of XorCipher must be an 1-length bytes object")
             else:
                 self.iv = value[0]
         else:
-            raise InvalidArgument("Index exceeds (XorCipher use only one parameter)")
+            raise Exception("Index exceeds (XorCipher use only one parameter)")
 
     def get_param(self, index: int) -> bytes:
         if index == 0:
             return self.iv.to_bytes(1, "big")
         
-        raise InvalidArgument("XorCipher use only one parameter")
+        raise Exception("XorCipher use only one parameter")
 
     def reset_params(self):
         newiv = os.urandom(1)
@@ -115,17 +114,17 @@ class XorCipher(_Cipher):
 class AES_CTR(_Cipher):
     def __init__(self, key: bytes):
         if len(key) * 8 not in [128, 192, 256, 512]:
-            raise InvalidArgument("Key size of AES must be in {128, 192, 256, 512}")
+            raise Exception("Key size of AES must be in {128, 192, 256, 512}")
         super().__init__(key, 1)
 
     def reset_key(self, newkey: bytes):
         if len(newkey) * 8 not in [128, 192, 256, 512]:
-            raise InvalidArgument("Key size of AES must be in {128, 192, 256, 512}")
+            raise Exception("Key size of AES must be in {128, 192, 256, 512}")
         self.key = newkey
 
     def encrypt(self, plaintext: bytes, finalize = True) -> bytes:
         if not isinstance(plaintext, bytes):
-            raise InvalidArgument("Plain text must be a bytes object")
+            raise Exception("Plain text must be a bytes object")
 
         if not hasattr(self, "encryptor"):
             raise EncryptFailed("Nonce has not been set yet")
@@ -140,7 +139,7 @@ class AES_CTR(_Cipher):
 
     def decrypt(self, ciphertext: bytes, finalize = True) -> bytes:
         if not isinstance(ciphertext, bytes):
-            raise InvalidArgument("Cipher text must be a bytes object")
+            raise Exception("Cipher text must be a bytes object")
 
         if not hasattr(self, "decryptor"):
             raise EncryptFailed("Nonce has not been set yet")
@@ -155,24 +154,24 @@ class AES_CTR(_Cipher):
 
     def set_param(self, index: int, param: bytes) -> None:
         if not isinstance(param, bytes):
-            raise InvalidArgument("Parameters of AES must be a bytes object")
+            raise Exception("Parameters of AES must be a bytes object")
 
         if index == 0:
             if len(param) != 16:
-                raise InvalidArgument("Invalid length of nonce value, expected 16 bytes")
+                raise Exception("Invalid length of nonce value, expected 16 bytes")
 
             self.nonce = param
             aes = Cipher(algorithms.AES(self.key), modes.CTR(self.nonce), default_backend())
             self.encryptor = aes.encryptor()
             self.decryptor = aes.decryptor()
         else:
-            raise InvalidArgument("AES only use the nonce value as its parameter")
+            raise Exception("AES only use the nonce value as its parameter")
 
     def get_param(self, index) -> bytes:
         if index == 0:
             return self.nonce
         else:
-            raise InvalidArgument("AES only use the nonce value as its parameter")
+            raise Exception("AES only use the nonce value as its parameter")
 
     def reset_params(self):
         new_nonce = os.urandom(16)
@@ -183,17 +182,17 @@ class AES_CTR(_Cipher):
 class AES_CBC(_Cipher):
     def __init__(self, key: bytes):
         if len(key) * 8 not in [128, 192, 256, 512]:
-            raise InvalidArgument("Key size of AES must be in {128, 192, 256, 512}")
+            raise Exception("Key size of AES must be in {128, 192, 256, 512}")
         super().__init__(key, 1)
 
     def reset_key(self, newkey: bytes):
         if len(newkey) * 8 not in [128, 192, 256, 512]:
-            raise InvalidArgument("Key size of AES must be in {128, 192, 256, 512}")
+            raise Exception("Key size of AES must be in {128, 192, 256, 512}")
         self.key = newkey
 
     def encrypt(self, plaintext: bytes, finalize = True) -> bytes:
         if not isinstance(plaintext, bytes):
-            raise InvalidArgument("Plain text must be a bytes object")
+            raise Exception("Plain text must be a bytes object")
 
         if not hasattr(self, "encryptor"):
             raise EncryptFailed("IV has not been set yet")
@@ -212,7 +211,7 @@ class AES_CBC(_Cipher):
 
     def decrypt(self, ciphertext: bytes, finalize = True) -> bytes:
         if not isinstance(ciphertext, bytes):
-            raise InvalidArgument("Cipher text must be a bytes object")
+            raise Exception("Cipher text must be a bytes object")
 
         if not hasattr(self, "decryptor"):
             raise EncryptFailed("IV has not been set yet")
@@ -231,11 +230,11 @@ class AES_CBC(_Cipher):
 
     def set_param(self, index: int, param: bytes) -> None:
         if not isinstance(param, bytes):
-            raise InvalidArgument("Parameters of AES must be a bytes object")
+            raise Exception("Parameters of AES must be a bytes object")
 
         if index == 0:
             if len(param) != 16:
-                raise InvalidArgument("Invalid length of iv value, expected 16 bytes")
+                raise Exception("Invalid length of iv value, expected 16 bytes")
 
             self.iv = param
             aes = Cipher(algorithms.AES(self.key), modes.CBC(self.iv), default_backend())
@@ -245,13 +244,13 @@ class AES_CBC(_Cipher):
             self.padder = padding.PKCS7(128).padder()
             self.unpadder = padding.PKCS7(128).unpadder()
         else:
-            raise InvalidArgument("AES only use the iv value as its parameter")
+            raise Exception("AES only use the iv value as its parameter")
 
     def get_param(self, index) -> bytes:
         if index == 0:
             return self.iv
         else:
-            raise InvalidArgument("AES only use the iv value as its parameter")
+            raise Exception("AES only use the iv value as its parameter")
 
     def reset_params(self):
         new_iv = os.urandom(16)

@@ -1,7 +1,6 @@
 import struct
 from .Packet import PacketEncoder, PacketDecoder
 from .Cipher import XorCipher, cipher_from_hash, hash_name
-from .DefinedError import InvalidArgument
 
 class SecurePacketException(Exception): ...
 class CipherTypeMismatch(SecurePacketException): ...
@@ -25,7 +24,7 @@ class SecurePacketEncoder(PacketEncoder):
             param = self.cipher.get_param(i)
 
             if not isinstance(param, bytes):
-                raise InvalidArgument("Parameter of cipher must be a bytes object")
+                raise Exception("Parameter of cipher must be a bytes object")
             
             param_size = len(param)
             param_struct = "B{}s".format(param_size)

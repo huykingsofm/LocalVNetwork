@@ -1,5 +1,4 @@
 import struct
-from .DefinedError import InvalidArgument
 
 class PacketException(Exception): ...
 class CannotExtractPacket(PacketException): ...
@@ -8,7 +7,7 @@ MAX_LENGTH = 65535 + 4294967295
 class PacketEncoder:
     def __call__(self, payload: bytes):
         if isinstance(payload, bytes) is False:
-            raise InvalidArgument("Payload must be a byte object")
+            raise Exception("Payload must be a byte object")
         
         # PACKET = HEADER + PAYLOAD
         # HEADER = HEADER_SIZE(2 bytes) + PAYLOAD_SIZE(4 byte) + OPTIONAL_HEADER
@@ -25,7 +24,7 @@ class PacketEncoder:
 class PacketDecoder:
     def _decode_header(self, packet: bytes):
         if isinstance(packet, bytes) is False:
-            raise InvalidArgument("Packet must be a bytes object")
+            raise Exception("Packet must be a bytes object")
 
         header_size, payload_size = struct.unpack(">HI", packet[:6])
         if len(packet) < header_size:
@@ -39,7 +38,7 @@ class PacketDecoder:
 
     def __call__(self, packet: bytes):
         if isinstance(packet, bytes) is False:
-            raise InvalidArgument("Packet must be a bytes object")
+            raise Exception("Packet must be a bytes object")
 
         try:
             header = self._decode_header(packet)
