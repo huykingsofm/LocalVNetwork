@@ -35,7 +35,7 @@ class STCPSocket(object):
         return self.socket.__exit__(args)
 
     def _start_serve(self):
-        self.__print__("Start serve socket...", "notification")
+        self.__print__("notification", "Start serve socket...")
         while not self.isclosed():
             try:
                 data = self.socket.recv(self.buffer_size)
@@ -44,11 +44,11 @@ class STCPSocket(object):
                 if e.errno in (errno.ECONNRESET, errno.ECONNABORTED, errno.ECONNREFUSED):
                     break
                 else:
-                    self.__print__(repr(e), "error")
+                    self.__print__("error", repr(e))
                     raise e
             except Exception as e:
                 self.close()
-                self.__print__(repr(e), "error")
+                self.__print__("error", repr(e))
                 raise e
             else:
                 if not data: # when be closed with linux-base machine, socket will receive infinite empty packet
@@ -56,7 +56,7 @@ class STCPSocket(object):
                     break
                 self.buffer.push(data)
                 self.process.set()
-        self.__print__("Stop serve socket...", "notification")
+        self.__print__("notification", "Stop serve socket...")
 
     def recv(self, reload_time = RELOAD_TIME):
         data = b''
@@ -72,18 +72,18 @@ class STCPSocket(object):
                 data = self.buffer.pop()
             except Packet.CannotExtractPacket as e: 
                 # Not enough length of packet
-                self.__print__(repr(e), "warning")
+                self.__print__("warning", repr(e))
                 break
             except SecurePacket.CipherTypeMismatch as e: 
                 # Cipher's type mismatch
-                self.__print__(repr(e), "warning")
+                self.__print__("warning", repr(e))
                 break
             except Cipher.DecryptFailed as e: 
                 # Cannot decrypt the packet: authentication failed, wrong parameters, ...
-                self.__print__(repr(e), "warning")
+                self.__print__("warning", repr(e))
                 break
             except Exception as e:
-                self.__print__(repr(e), "error")
+                self.__print__("error", repr(e))
                 break
             finally:
                 if not data:
@@ -97,25 +97,25 @@ class STCPSocket(object):
     def send(self, data):
         self.cipher.reset_params()
         packet = self.packet_encoder(data)
-        self.__print__("Send: {}".format(packet), "notification")
+        self.__print__("notification", "Send: {}".format(packet))
         return self.socket.send(packet)
 
     def sendall(self, data):
         self.cipher.reset_params()
         packet = self.packet_encoder(data)
-        self.__print__("Send: {}".format(packet), "notification")
+        self.__print__("notification", "Send: {}".format(packet))
         return self.socket.sendall(packet)
     
     def bind(self, address):
         return self.socket.bind(address)
 
     def listen(self):
-        self.__print__("Server listen...", "notification")
+        self.__print__("notification", "Server listen...")
         return self.socket.listen()
 
     def accept(self):
         socket, addr = self.socket.accept()
-        self.__print__("Server accept {}".format(addr), "notification")
+        self.__print__("notification", "Server accept {}".format(addr))
         socket = self._fromsocket(socket, addr, start_serve= True)
         return socket, addr
 
@@ -139,7 +139,7 @@ class STCPSocket(object):
     
     def _fromsocket(self, socket: socket.socket, address, start_serve = True):
         cipher = copy.copy(self.cipher)
-        dtp = STCPSocket(cipher, self.buffer_size, self.__print__.verbosities)
+        dtp = STCPSocket(cipher, self.buffer_size, self.__print__.__verbosities__)
         dtp.socket = socket
         dtp.__print__.prefix = f"STCP Socket {address}"
         dtp.buffer = PacketBuffer(dtp.packet_decoder, address, ("error", ))

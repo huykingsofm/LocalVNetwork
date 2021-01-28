@@ -140,7 +140,7 @@ class ForwardNode(LocalNode):
             if self.node.__process__.is_set() == False:
                 self.node.__process__.set()
 
-        self.__print__(f"Stopped", "notification")
+        self.__print__("notification", f"Stopped")
 
     def _wait_message_from_remote(self):
         while not self._closed:
@@ -149,13 +149,13 @@ class ForwardNode(LocalNode):
             except STCPSocketClosed:
                 break
             except Exception as e:
-                self.__print__(repr(e), "error")
+                self.__print__("error", repr(e))
                 break
             if data:
                 super().send(self.node.name, data)    
         
         self.forward_process.set()
-        self.__print__("Waiting from remote ended", "notification")
+        self.__print__("notification", "Waiting from remote ended")
 
     def _wait_message_from_node(self):
         while not self._closed:
@@ -164,13 +164,13 @@ class ForwardNode(LocalNode):
             except AttributeError as e: # after close forwarder, it dont have buffer attribute --> error
                 break
             except Exception as e:
-                self.__print__(repr(e), "warning")
+                self.__print__("warning", repr(e))
                 break
             if message:
                 self.remote_client.send(message)
 
         self.forward_process.set()
-        self.__print__("Waiting from node ended", "notification")
+        self.__print__("notification", "Waiting from node ended")
 
     def send(self, received_node_name, message):
         raise NotImplementedError
