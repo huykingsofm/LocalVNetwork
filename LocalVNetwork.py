@@ -108,7 +108,7 @@ class ForwardNode(LocalNode):
         name = None, 
         implicated_die = False,
         reload_time = RELOAD_TIME,
-        verbosities: tuple = ("error", )
+        verbosities: tuple = {"user": ["error"], "dev": ["error"]}
     ):
         self.node = node
         self.remote_client = socket
