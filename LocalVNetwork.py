@@ -152,8 +152,12 @@ class ForwardNode(LocalNode):
                 self.__print__("dev", "error", repr(e))
                 break
             if data:
-                super().send(self.node.name, data)    
-        
+                try:
+                    super().send(self.node.name, data)    
+                except ChannelClosed:
+                    self.__print__("user", "notification", "Channel closed")
+                    break
+
         self.forward_process.set()
         self.__print__("user", "notification", "Waiting from remote ended")
 
@@ -161,7 +165,10 @@ class ForwardNode(LocalNode):
         while not self._closed:
             try:
                 _, message, _ = super().recv()
-            except AttributeError as e: # after close forwarder, it dont have buffer attribute --> error
+            except AttributeError: # after close forwarder, it dont have buffer attribute --> error
+                break
+            except ChannelClosed:
+                self.__print__("user", "notification", "Channel closed")
                 break
             except Exception as e:
                 self.__print__("user", "error", "Unknown error")
