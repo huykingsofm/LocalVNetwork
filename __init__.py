@@ -1,5 +1,5 @@
 from .Cipher import NoCipher, XorCipher, AES_CTR, AES_CBC, SimpleSSL
-from .CustomPrint import CustomPrint, StandardPrint
+from .CustomPrint import SelectivePrint, StandardPrint
 from .LocalVNetwork import LocalNode, ForwardNode
 from .Packet import PacketEncoder, PacketDecoder
 from .PacketBuffer import PacketBuffer

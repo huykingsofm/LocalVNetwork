@@ -142,7 +142,7 @@ class STCPSocket(object):
     
     def _fromsocket(self, socket: socket.socket, address, start_serve = True):
         cipher = copy.copy(self.cipher)
-        dtp = STCPSocket(cipher, self.buffer_size, self.__print__.__verbosities__)
+        dtp = STCPSocket(cipher, self.buffer_size, self.__print__._verbosities)
         dtp.socket = socket
         dtp.__print__.prefix = f"STCP Socket {address}"
         dtp.buffer = PacketBuffer(dtp.packet_decoder, address, {"dev": {"error"}})
