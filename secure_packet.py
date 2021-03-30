@@ -1,7 +1,6 @@
 import struct
 from hks_network.packet import PacketEncoder, PacketDecoder
-from hks_network.lib.cipher import cipher_from_hash, hash_name
-
+from hks_network.lib.cipher import cipher_from_hash, hash_name, _Cipher
 
 class SecurePacketException(Exception): ...
 class CipherTypeMismatch(SecurePacketException): ...
@@ -9,12 +8,12 @@ class CipherTypeMismatch(SecurePacketException): ...
 
 class SecurePacketEncoder(PacketEncoder):
     # A packet generator encrypting by AES-256 and hashing by MD5
-    def __init__(self, cipher):
+    def __init__(self, cipher: _Cipher):
         self.cipher = cipher
 
     def __call__(self, payload: bytes):
         payload = self.cipher.encrypt(payload)
-        packet = super().__call__(payload)
+        packet = super().pack(payload)
 
         # SECURE HEADER = TYPE_OF_CIPHER (2 bytes) + NUMBER_OF_PARAMS(1 byte)
         #                 + PARAM1_SIZE + PARAM1 + PARAM2_SIZE + PARAM2 + ...
@@ -44,11 +43,11 @@ class SecurePacketEncoder(PacketEncoder):
 
 class SecurePacketDecoder(PacketDecoder):
     # A packet generator encrypting by AES-256 and hashing by MD5
-    def __init__(self, cipher):
+    def __init__(self, cipher: _Cipher):
         self.cipher = cipher
 
     def __call__(self, packet: bytes):
-        packet_dict = super().__call__(packet)
+        packet_dict = super().unpack(packet)
 
         # ORIGINAL HEADER = HEADER_SIZE (2 bytes) + PAYLOAD_SIZE (2 byte)
         original_header_size = 6
@@ -59,7 +58,7 @@ class SecurePacketDecoder(PacketDecoder):
         cipher_type = cipher_from_hash.get(cipher_hashvalue, None)
 
         if cipher_type is None or not isinstance(self.cipher, cipher_type):
-            raise CipherTypeMismatch("Cipher type mismatch")
+            raise CipherTypeMismatch("Cipher type is invalid")
 
         number_of_params = struct.unpack(">B", packet[original_header_size + 2: original_header_size + 3])[0]
         current_index = original_header_size + 3

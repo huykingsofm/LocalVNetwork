@@ -1,3 +1,4 @@
+from os import stat
 import struct
 
 MAX_LENGTH = 65535 + 4294967295
@@ -8,7 +9,8 @@ class CannotExtractPacket(PacketException): ...
 
 
 class PacketEncoder(object):
-    def __call__(self, payload: bytes):
+    @staticmethod
+    def pack(payload: bytes):
         if isinstance(payload, bytes) is False:
             raise Exception("Payload must be a byte object")
 
@@ -26,7 +28,8 @@ class PacketEncoder(object):
 
 
 class PacketDecoder(object):
-    def _decode_header(self, packet: bytes):
+    @staticmethod
+    def _decode_header(packet: bytes):
         if isinstance(packet, bytes) is False:
             raise Exception("Packet must be a bytes object")
 
@@ -40,12 +43,13 @@ class PacketDecoder(object):
 
         return header_dict
 
-    def __call__(self, packet: bytes):
+    @staticmethod
+    def unpack(packet: bytes):
         if isinstance(packet, bytes) is False:
             raise Exception("Packet must be a bytes object")
 
         try:
-            header = self._decode_header(packet)
+            header = PacketDecoder._decode_header(packet)
         except Exception as e:
             raise e
 

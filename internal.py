@@ -14,29 +14,29 @@ class ChannelClosed(ChannelException): ...
 
 class ChannelBuffer(object):
     def __init__(self):
-        self.__buffer__ = []
+        self._buffer = []
 
     def push(self, source: str, message: bytes, obj: object = None):
-        self.__buffer__.append({"source": source, "message": message, "obj": obj})
+        self._buffer.append({"source": source, "message": message, "obj": obj})
 
     def pop(self, source: str = None):
-        if len(self.__buffer__) == 0:
+        if len(self._buffer) == 0:
             return None, None, None
 
         idx = 0
         if source is not None:
-            for i, packet in enumerate(self.__buffer__):
+            for i, packet in enumerate(self._buffer):
                 if packet["source"] == source:
                     idx = i
                     break
 
-        packet = self.__buffer__[idx]
-        del self.__buffer__[idx]
+        packet = self._buffer[idx]
+        del self._buffer[idx]
 
         return packet["source"], packet["message"], packet["obj"]
 
     def __len__(self):
-        return len(self.__buffer__)
+        return len(self._buffer)
 
 
 class LocalNode(object):
@@ -58,8 +58,8 @@ class LocalNode(object):
         LocalNode.node_names.append(name)
         LocalNode.nodes.append(self)
         self.name = name
-        self.__buffer__ = ChannelBuffer()
-        self.__process__ = threading.Event()
+        self._buffer = ChannelBuffer()
+        self.__buffer_available = threading.Event()
         self._closed = False
 
     def send(self, destination_name: str, message: bytes, obj: object = None):
@@ -75,31 +75,31 @@ class LocalNode(object):
         except ValueError:
             raise ChannelSlotError(f"No username is {destination_name}")
 
-        destination_node.__buffer__.push(self.name, message, obj)
-        destination_node.__process__.set()
+        destination_node._buffer.push(self.name, message, obj)
+        destination_node.__buffer_available.set()
 
     def recv(self, source=None):
         if self._closed:
             raise ChannelClosed("Channel closed")
 
-        if len(self.__buffer__) == 0 and not self._closed:
-            self.__process__.wait()
-        self.__process__.clear()
+        if len(self._buffer) == 0 and not self._closed:
+            self.__buffer_available.wait()
+        self.__buffer_available.clear()
 
         if self._closed:
             raise ChannelClosed("Channel closed")
 
-        return self.__buffer__.pop(source)
+        return self._buffer.pop(source)
 
     def close(self):
         if not self._closed:
             self._closed = True
-            self.__process__.set()
+            self.__buffer_available.set()
             my_slot = LocalNode.node_names.index(self.name)
             del LocalNode.node_names[my_slot]
             del LocalNode.nodes[my_slot]
             self.name = None
-            del self.__buffer__
+            del self._buffer
 
 
 class ForwardNode(LocalNode):
@@ -111,16 +111,16 @@ class ForwardNode(LocalNode):
                     implicated_die: bool = False,
                     verbosities: tuple = {"user": ["error"], "dev": ["error"]}
                 ):
-        self.node = node
-        self.remote_client = socket
+        self._node = node
+        self._remote_client = socket
         super().__init__(name)
 
-        self.implicated_die = implicated_die
+        self._implicated_die = implicated_die
         if verbosities is None:
             verbosities = socket.__print.verbosities
 
-        self.__print__ = StandardPrint(f"ForwardNode {self.name}", verbosities)
-        self.forward_process = threading.Event()
+        self.__print = StandardPrint(f"ForwardNode {self.name}", verbosities)
+        self._one_thread_stop = threading.Event()
 
     def start(self):
         t1 = threading.Thread(target=self._wait_message_from_node)
@@ -131,36 +131,36 @@ class ForwardNode(LocalNode):
         t2.setDaemon(True)
         t2.start()
 
-        self.forward_process.wait()
+        self._one_thread_stop.wait()
         self.close()
-        if self.implicated_die:
-            self.node.close()
-            self.remote_client.close()
+        if self._implicated_die:
+            self._node.close()
+            self._remote_client.close()
         else:
-            if self.node.__process__.is_set() is False:
-                self.node.__process__.set()
+            if self._node.__buffer_available.is_set() is False:
+                self._node.__buffer_available.set()
 
-        self.__print__("user", "notification", "Stopped")
+        self.__print("user", "notification", "Stopped")
 
     def _wait_message_from_remote(self):
         while not self._closed:
             try:
-                data = self.remote_client.recv()
+                data = self._remote_client.recv()
             except STCPSocketClosed:
                 break
             except Exception as e:
-                self.__print__("user", "error", "Unknown error")
-                self.__print__("dev", "error", repr(e))
+                self.__print("user", "error", "Unknown error")
+                self.__print("dev", "error", repr(e))
                 break
             if data:
                 try:
-                    super().send(self.node.name, data)
+                    super().send(self._node.name, data)
                 except ChannelClosed:
-                    self.__print__("user", "notification", "Channel closed")
+                    self.__print("user", "notification", "Channel closed")
                     break
 
-        self.forward_process.set()
-        self.__print__("user", "notification", "Waiting from remote ended")
+        self._one_thread_stop.set()
+        self.__print("user", "notification", "Waiting from remote ended")
 
     def _wait_message_from_node(self):
         while not self._closed:
@@ -169,17 +169,17 @@ class ForwardNode(LocalNode):
             except AttributeError:  # after close forwarder, it dont have buffer attribute --> error
                 break
             except ChannelClosed:
-                self.__print__("user", "notification", "Channel closed")
+                self.__print("user", "notification", "Channel closed")
                 break
             except Exception as e:
-                self.__print__("user", "error", "Unknown error")
-                self.__print__("dev", "error", repr(e))
+                self.__print("user", "error", "Unknown error")
+                self.__print("dev", "error", repr(e))
                 break
             if message:
-                self.remote_client.send(message)
+                self._remote_client.send(message)
 
-        self.forward_process.set()
-        self.__print__("user", "notification", "Waiting from node ended")
+        self._one_thread_stop.set()
+        self.__print("user", "notification", "Waiting from node ended")
 
     def send(self, received_node_name, message):
         raise NotImplementedError
