@@ -1,4 +1,4 @@
-[submodule "CustomPrint"]
-	path = CustomPrint
-	url = https://github.com/huykingsofm/CustomPrint
+[submodule "lib/selective_print"]
+	path = lib/selective_print
+	url = https://github.com/huykingsofm/selective_print
 	branch = main
