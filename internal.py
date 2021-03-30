@@ -1,11 +1,8 @@
-import re
-import time
-import errno
-import threading
 import random
-from .CustomPrint import StandardPrint
-from .PacketBuffer import PacketBuffer
-from .SecureTCP import STCPSocket, STCPSocketClosed, RELOAD_TIME
+import threading
+from hks_network.lib.CustomPrint import StandardPrint
+from hks_network.external import STCPSocket, STCPSocketClosed
+
 
 class ChannelException(Exception): ...
 class ChannelSlotError(ChannelException): ...
@@ -14,19 +11,20 @@ class ChannelObjectExists(ChannelException): ...
 class ChannelMessageFormatError(ChannelException): ...
 class ChannelClosed(ChannelException): ...
 
-class AnythingBuffer(object):
+
+class ChannelBuffer(object):
     def __init__(self):
         self.__buffer__ = []
 
-    def push(self, source, message, obj = None):
+    def push(self, source: str, message: bytes, obj: object = None):
         self.__buffer__.append({"source": source, "message": message, "obj": obj})
 
-    def pop(self, source = None):
+    def pop(self, source: str = None):
         if len(self.__buffer__) == 0:
             return None, None, None
 
         idx = 0
-        if source != None:
+        if source is not None:
             for i, packet in enumerate(self.__buffer__):
                 if packet["source"] == source:
                     idx = i
@@ -40,55 +38,57 @@ class AnythingBuffer(object):
     def __len__(self):
         return len(self.__buffer__)
 
-MAX_NODES = 8
+
 class LocalNode(object):
     nodes = []
     node_names = []
-    def __init__(self, name = None):
-        if name == None:
-            while name == None or name in LocalNode.node_names:
+    MAX_NODES = 8
+
+    def __init__(self, name: str = None):
+        if name is None:
+            while name is None or name in LocalNode.node_names:
                 name = str(random.randint(1000000, 9999999))
 
         if name in LocalNode.node_names:
             raise ChannelObjectExists(f"Name {name} inuse")
 
-        if len(LocalNode.nodes) >= MAX_NODES:
+        if len(LocalNode.nodes) >= LocalNode.MAX_NODES:
             raise ChannelFullSlots("No available slot in Local Node")
 
         LocalNode.node_names.append(name)
         LocalNode.nodes.append(self)
         self.name = name
-        self.__buffer__ = AnythingBuffer()
+        self.__buffer__ = ChannelBuffer()
         self.__process__ = threading.Event()
         self._closed = False
 
-    def send(self, destination_name: str, message: bytes, obj = None):
-        if isinstance(message, bytes) == False:
+    def send(self, destination_name: str, message: bytes, obj: object = None):
+        if isinstance(message, bytes) is False:
             raise Exception("Message must be a bytes object")
 
         if self._closed:
             raise ChannelClosed("Channel closed")
-        
+
         try:
             slot_of_destination = LocalNode.node_names.index(destination_name)
             destination_node: LocalNode = LocalNode.nodes[slot_of_destination]
-        except:
+        except ValueError:
             raise ChannelSlotError(f"No username is {destination_name}")
-            
+
         destination_node.__buffer__.push(self.name, message, obj)
         destination_node.__process__.set()
 
-    def recv(self, source = None):
+    def recv(self, source=None):
         if self._closed:
             raise ChannelClosed("Channel closed")
-        
+
         if len(self.__buffer__) == 0 and not self._closed:
             self.__process__.wait()
         self.__process__.clear()
-        
+
         if self._closed:
             raise ChannelClosed("Channel closed")
-        
+
         return self.__buffer__.pop(source)
 
     def close(self):
@@ -101,32 +101,33 @@ class LocalNode(object):
             self.name = None
             del self.__buffer__
 
+
 class ForwardNode(LocalNode):
-    def __init__(self, 
-        node: LocalNode, 
-        socket: STCPSocket, 
-        name = None, 
-        implicated_die = False,
-        reload_time = RELOAD_TIME,
-        verbosities: tuple = {"user": ["error"], "dev": ["error"]}
-    ):
+    def __init__(
+                    self,
+                    node: LocalNode,
+                    socket: STCPSocket,
+                    name: str = None,
+                    implicated_die: bool = False,
+                    verbosities: tuple = {"user": ["error"], "dev": ["error"]}
+                ):
         self.node = node
         self.remote_client = socket
         super().__init__(name)
-    
+
         self.implicated_die = implicated_die
-        if verbosities == None:
-            verbosities = socket.__print__.verbosities
-    
+        if verbosities is None:
+            verbosities = socket.__print.verbosities
+
         self.__print__ = StandardPrint(f"ForwardNode {self.name}", verbosities)
         self.forward_process = threading.Event()
 
     def start(self):
-        t1 = threading.Thread(target= self._wait_message_from_node)
+        t1 = threading.Thread(target=self._wait_message_from_node)
         t1.setDaemon(True)
         t1.start()
 
-        t2 = threading.Thread(target= self._wait_message_from_remote)
+        t2 = threading.Thread(target=self._wait_message_from_remote)
         t2.setDaemon(True)
         t2.start()
 
@@ -136,7 +137,7 @@ class ForwardNode(LocalNode):
             self.node.close()
             self.remote_client.close()
         else:
-            if self.node.__process__.is_set() == False:
+            if self.node.__process__.is_set() is False:
                 self.node.__process__.set()
 
         self.__print__("user", "notification", "Stopped")
@@ -153,7 +154,7 @@ class ForwardNode(LocalNode):
                 break
             if data:
                 try:
-                    super().send(self.node.name, data)    
+                    super().send(self.node.name, data)
                 except ChannelClosed:
                     self.__print__("user", "notification", "Channel closed")
                     break
@@ -165,7 +166,7 @@ class ForwardNode(LocalNode):
         while not self._closed:
             try:
                 _, message, _ = super().recv()
-            except AttributeError: # after close forwarder, it dont have buffer attribute --> error
+            except AttributeError:  # after close forwarder, it dont have buffer attribute --> error
                 break
             except ChannelClosed:
                 self.__print__("user", "notification", "Channel closed")

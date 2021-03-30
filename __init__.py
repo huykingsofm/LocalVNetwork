@@ -1,7 +1,2 @@
-from .Cipher import NoCipher, XorCipher, AES_CTR, AES_CBC, SimpleSSL
-from .CustomPrint import CustomPrint, StandardPrint
-from .LocalVNetwork import LocalNode, ForwardNode
-from .Packet import PacketEncoder, PacketDecoder
-from .PacketBuffer import PacketBuffer
-from .SecurePacket import SecurePacketEncoder, SecurePacketDecoder
-from .SecureTCP import STCPSocket
+from hks_network.lib.cipher import NoCipher, XorCipher, AES_CBC, AES_CTR, SimpleSSL
+from hks_network.lib.CustomPrint import CustomPrint, StandardPrint
