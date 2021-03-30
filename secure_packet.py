@@ -1,6 +1,6 @@
 import struct
-from hks_network.packet import PacketEncoder, PacketDecoder
-from hks_network.lib.cipher import cipher_from_hash, hash_name, _Cipher
+from .packet import PacketEncoder, PacketDecoder
+from .lib.cipher import cipher_from_hash, hash_name, _Cipher
 
 class SecurePacketException(Exception): ...
 class CipherTypeMismatch(SecurePacketException): ...

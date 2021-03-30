@@ -1,4 +1,3 @@
-from os import stat
 import struct
 
 MAX_LENGTH = 65535 + 4294967295

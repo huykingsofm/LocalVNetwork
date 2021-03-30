@@ -1,7 +1,7 @@
 import random
 import threading
-from hks_network.lib.CustomPrint import StandardPrint
-from hks_network.external import STCPSocket, STCPSocketClosed
+from .lib.selective_print import StandardPrint
+from .external import STCPSocket, STCPSocketClosed
 
 
 class ChannelException(Exception): ...

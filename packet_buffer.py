@@ -1,6 +1,6 @@
 import threading
-from hks_network.packet import CannotExtractPacket 
-from hks_network.lib.CustomPrint import StandardPrint
+from .packet import CannotExtractPacket 
+from .lib.selective_print import StandardPrint
 
 
 class PacketBufferException(Exception): ...

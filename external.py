@@ -4,15 +4,15 @@ import errno
 import socket
 import threading
 
-from hks_network.lib.cipher import NoCipher
-from hks_network.packet_buffer import PacketBuffer
-from hks_network.lib.CustomPrint import StandardPrint
-from hks_network.secure_packet import SecurePacketEncoder, SecurePacketDecoder
+from .lib.cipher import NoCipher
+from .packet_buffer import PacketBuffer
+from .lib.selective_print import StandardPrint
+from .secure_packet import SecurePacketEncoder, SecurePacketDecoder
 
 # Exception
-from hks_network.lib.cipher import DecryptFailed
-from hks_network.packet import CannotExtractPacket
-from hks_network.secure_packet import CipherTypeMismatch
+from .lib.cipher import DecryptFailed
+from .packet import CannotExtractPacket
+from .secure_packet import CipherTypeMismatch
 
 
 DEFAULT_RELOAD_TIME = 0.000001
@@ -185,7 +185,7 @@ class STCPSocket(object):
 
     def _fromsocket(self, socket: socket.socket, address, start_serve=True):
         cipher = copy.copy(self.__cipher)
-        dtp = STCPSocket(cipher, self._buffer_size, self.__print.__verbosities__)
+        dtp = STCPSocket(cipher, self._buffer_size, self.__print._verbosities)
         dtp._socket = socket
         dtp.__print.prefix = f"STCP Socket {address}"
         dtp._buffer = PacketBuffer(dtp.__packet_decoder, address, {"dev": {"error"}})
