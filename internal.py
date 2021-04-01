@@ -119,14 +119,17 @@ class LocalNode(object):
 class ForwardNode(LocalNode):
     def __init__(
                     self,
-                    node: LocalNode,
-                    socket: STCPSocket,
+                    node: LocalNode = None,
+                    socket: STCPSocket = None,
                     name: str = None,
                     implicated_die: bool = False,
                     verbosities: tuple = {"user": ["error"], "dev": ["error"]}
                 ):
+        assert node is None or isinstance(node, LocalNode)
+        assert socket is None or isinstance(socket, STCPSocket)
+            
         self._node = node
-        self._remote_client = socket
+        self._socket = socket
         super().__init__(name)
 
         self._implicated_die = implicated_die
@@ -136,7 +139,18 @@ class ForwardNode(LocalNode):
         self.__print = StandardPrint(f"ForwardNode {self.name}", verbosities)
         self._one_thread_stop = threading.Event()
 
+    def set_node(self, node):
+        assert node is None or isinstance(node, LocalNode)
+        self._node = node
+    
+    def set_socket(self, socket):
+        assert socket is None or isinstance(socket, STCPSocket)
+        self._socket = socket
+
     def start(self):
+        if not self._node or not self._socket:
+            raise Exception("ForwardNode must be initilized with both node and socket")
+
         t1 = threading.Thread(target=self._wait_message_from_node)
         t1.setDaemon(True)
         t1.start()
@@ -149,7 +163,7 @@ class ForwardNode(LocalNode):
         self.close()
         if self._implicated_die:
             self._node.close()
-            self._remote_client.close()
+            self._socket.close()
         else:
             if self._node.__buffer_available.is_set() is False:
                 self._node.__buffer_available.set()
@@ -159,7 +173,7 @@ class ForwardNode(LocalNode):
     def _wait_message_from_remote(self):
         while not self._closed:
             try:
-                data = self._remote_client.recv()
+                data = self._socket.recv()
             except STCPSocketClosed:
                 break
             except Exception as e:
@@ -190,7 +204,7 @@ class ForwardNode(LocalNode):
                 self.__print("dev", "error", repr(e))
                 break
             if message:
-                self._remote_client.send(message)
+                self._socket.send(message)
 
         self._one_thread_stop.set()
         self.__print("user", "notification", "Waiting from node ended")

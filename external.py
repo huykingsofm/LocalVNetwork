@@ -154,7 +154,7 @@ class STCPSocket(object):
     def bind(self, address):
         return self._socket.bind(address)
 
-    def listen(self, __backlog: int = ...):
+    def listen(self, __backlog: int = 0):
         self.__print("user", "notification", "Server listen...")
         return self._socket.listen(__backlog)
 
