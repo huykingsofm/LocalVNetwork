@@ -15,11 +15,15 @@ class ChannelClosed(ChannelException): ...
 class ChannelBuffer(object):
     def __init__(self):
         self._buffer = []
+        self.__lock = threading.Lock()
 
     def push(self, source: str, message: bytes, obj: object = None):
+        self.__lock.acquire()
         self._buffer.append({"source": source, "message": message, "obj": obj})
+        self.__lock.release()
 
     def pop(self, source: str = None):
+        self.__lock.acquire()
         if len(self._buffer) == 0:
             return None, None, None
 
@@ -33,6 +37,7 @@ class ChannelBuffer(object):
         packet = self._buffer[idx]
         del self._buffer[idx]
 
+        self.__lock.release()
         return packet["source"], packet["message"], packet["obj"]
 
     def __len__(self):
@@ -50,19 +55,22 @@ class LocalNode(object):
                 name = str(random.randint(1000000, 9999999))
 
         if name in LocalNode.node_names:
-            raise ChannelObjectExists(f"Name {name} inuse")
+            raise ChannelObjectExists(f"Name {name} is in use")
 
         if len(LocalNode.nodes) >= LocalNode.MAX_NODES:
-            raise ChannelFullSlots("No available slot in Local Node")
+            raise ChannelFullSlots("No available slot in Local Node list")
 
         LocalNode.node_names.append(name)
         LocalNode.nodes.append(self)
         self.name = name
         self._buffer = ChannelBuffer()
-        self.__buffer_available = threading.Event()
         self._closed = False
+        self.__buffer_available = threading.Event()
+        self.__send_lock = threading.Lock()
+        self.__recv_lock = threading.Lock()
 
     def send(self, destination_name: str, message: bytes, obj: object = None):
+        self.__send_lock.acquire()
         if isinstance(message, bytes) is False:
             raise Exception("Message must be a bytes object")
 
@@ -73,12 +81,14 @@ class LocalNode(object):
             slot_of_destination = LocalNode.node_names.index(destination_name)
             destination_node: LocalNode = LocalNode.nodes[slot_of_destination]
         except ValueError:
-            raise ChannelSlotError(f"No username is {destination_name}")
+            raise ChannelSlotError(f"Channel name {destination_name} doesn't exist")
 
         destination_node._buffer.push(self.name, message, obj)
         destination_node.__buffer_available.set()
+        self.__send_lock.release()
 
     def recv(self, source=None):
+        self.__recv_lock.acquire()
         if self._closed:
             raise ChannelClosed("Channel closed")
 
@@ -89,9 +99,12 @@ class LocalNode(object):
         if self._closed:
             raise ChannelClosed("Channel closed")
 
-        return self._buffer.pop(source)
+        source, msg, obj = self._buffer.pop(source)
+        self.__recv_lock.release()
+        return source, msg, obj
 
     def close(self):
+        self.__recv_lock.acquire()
         if not self._closed:
             self._closed = True
             self.__buffer_available.set()
@@ -100,6 +113,7 @@ class LocalNode(object):
             del LocalNode.nodes[my_slot]
             self.name = None
             del self._buffer
+        self.__recv_lock.release()
 
 
 class ForwardNode(LocalNode):

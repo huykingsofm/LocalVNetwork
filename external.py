@@ -34,16 +34,16 @@ class STCPSocket(object):
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.__cipher = cipher
         self.__cipher.reset_params()
-        self._reload_time = DEFAULT_RELOAD_TIME
-        self._timeout = None
+        self.__reload_time = DEFAULT_RELOAD_TIME
+        self.__recv_timeout = None
 
         self.__packet_encoder = SecurePacketEncoder(self.__cipher)
         self.__packet_decoder = SecurePacketDecoder(self.__cipher)
-        self._buffer = None
-        self._buffer_size = buffer_size
+        self.__buffer = None
+        self.__buffer_size = buffer_size
 
-        self._buffer_available = threading.Event()
-        self._stop_recv = False
+        self.__buffer_available = threading.Event()
+        self._stop_auto_recv = False
 
         self.__print = StandardPrint("STCP Socket", verbosities)
 
@@ -57,9 +57,9 @@ class STCPSocket(object):
         self.__print("user", "notification", "Start serve socket...")
         while not self.isclosed():
             try:
-                data = self._socket.recv(self._buffer_size)
+                data = self._socket.recv(self.__buffer_size)
             except socket.error as e:
-                if isinstance(e, socket.timeout) and not self._stop_recv:
+                if isinstance(e, socket.timeout) and not self._stop_auto_recv:
                     continue
 
                 # self._socket.shutdown(socket.SHUT_RDWR)
@@ -83,28 +83,31 @@ class STCPSocket(object):
                     # self._socket.shutdown(socket.SHUT_RDWR)
                     self._socket.close()
                     break
-                self._buffer.push(data)
-                self._buffer_available.set()
-        self._buffer_available.set()
+                self.__buffer.push(data)
+                self.__buffer_available.set()
+        self.__buffer_available.set()
         self.__print("user", "notification", "Stop serve socket...")
 
+    def set_recv_timeout(self, value: float):
+        self.__recv_timeout = value
+
     def settimeout(self, value: float):
-        self._timeout = value
+        return self._socket.settimeout(value)
 
     def setreloadtime(self, reloadtime: float):
-        self._reload_time = reloadtime
+        self.__reload_time = reloadtime
 
     def recv(self, bufsize: int, flags: int = ...) -> bytes:
         data = b''
-        if self._timeout is not None:
+        if self.__recv_timeout is not None:
             start_recv_time = time.time()
 
         while not data:
-            if self.isclosed() and len(self._buffer) == 0:
+            if self.isclosed() and len(self.__buffer) == 0:
                 raise STCPSocketClosed("Connection closed")
 
             try:
-                data = self._buffer.pop()
+                data = self.__buffer.pop()
             except CannotExtractPacket as e:
                 # Not enough length of packet
                 self.__print("dev", "warning", repr(e))
@@ -123,17 +126,17 @@ class STCPSocket(object):
                 break
             finally:
                 if not data:
-                    if self._timeout is not None and time.time() - start_recv_time > self._timeout:
-                        if self._timeout != 0:
+                    if self.__recv_timeout is not None and time.time() - start_recv_time > self.__recv_timeout:
+                        if self.__recv_timeout != 0:
                             raise STCPSocketTimeout("Receiving exceeds timeout")
                         else:
                             raise STCPSocketTimeout("Method recv() can not return the value immediately")
-                    time.sleep(self._reload_time)
+                    time.sleep(self.__reload_time)
 
-                    if self._timeout is None and len(self._buffer) == 0 and not self.isclosed():
-                        self._buffer_available.wait()
+                    if self.__recv_timeout is None and len(self.__buffer) == 0 and not self.isclosed():
+                        self.__buffer_available.wait()
 
-        self._buffer_available.clear()
+        self.__buffer_available.clear()
         return data
 
     def send(self, data) -> int:
@@ -151,9 +154,9 @@ class STCPSocket(object):
     def bind(self, address):
         return self._socket.bind(address)
 
-    def listen(self):
+    def listen(self, __backlog: int = ...):
         self.__print("user", "notification", "Server listen...")
-        return self._socket.listen()
+        return self._socket.listen(__backlog)
 
     def accept(self):
         socket, addr = self._socket.accept()
@@ -167,30 +170,30 @@ class STCPSocket(object):
 
         self._socket.settimeout(DEFAULT_TIME_OUT)  # timeout for non-blocking socket
 
-        self._stop_recv = False
+        self._stop_auto_recv = False
         server = threading.Thread(target=self._start_auto_recv)
         server.setDaemon(False)
         server.start()
 
-        self._buffer = PacketBuffer(self.__packet_decoder, address, {"dev": {"error"}})
+        self.__buffer = PacketBuffer(self.__packet_decoder, address, {"dev": {"error"}})
         self.__print.prefix = f"STCP Socket {address}"
         return ret
 
     def close(self):
-        self._buffer_available.set()
-        self._stop_recv = True
+        self.__buffer_available.set()
+        self._stop_auto_recv = True
 
     def isclosed(self):
         return self._socket._closed
 
     def _fromsocket(self, socket: socket.socket, address, start_serve=True):
         cipher = copy.copy(self.__cipher)
-        dtp = STCPSocket(cipher, self._buffer_size, self.__print._verbosities)
+        dtp = STCPSocket(cipher, self.__buffer_size, self.__print._verbosities)
         dtp._socket = socket
         dtp.__print.prefix = f"STCP Socket {address}"
-        dtp._buffer = PacketBuffer(dtp.__packet_decoder, address, {"dev": {"error"}})
+        dtp.__buffer = PacketBuffer(dtp.__packet_decoder, address, {"dev": {"error"}})
         if start_serve:
-            dtp._stop_recv = False
+            dtp._stop_auto_recv = False
             server = threading.Thread(target=dtp._start_auto_recv)
             server.setDaemon(False)
             server.start()
