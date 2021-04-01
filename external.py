@@ -97,7 +97,7 @@ class STCPSocket(object):
     def setreloadtime(self, reloadtime: float):
         self.__reload_time = reloadtime
 
-    def recv(self, bufsize: int, flags: int = ...) -> bytes:
+    def recv(self) -> bytes:
         data = b''
         if self.__recv_timeout is not None:
             start_recv_time = time.time()
