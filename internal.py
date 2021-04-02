@@ -1,8 +1,8 @@
 import random
 import threading
-from .lib.selective_print import StandardPrint
+from . import standard_logger_generator
 from .external import STCPSocket, STCPSocketClosed
-
+from .lib.logger.logger import StandardLoggerGenerator
 
 class ChannelException(Exception): ...
 class ChannelSlotError(ChannelException): ...
@@ -65,7 +65,7 @@ class LocalNode(object):
         self.name = name
         self._buffer = ChannelBuffer()
         self._closed = False
-        self.__buffer_available = threading.Event()
+        self._buffer_available = threading.Event()
         self.__send_lock = threading.Lock()
         self.__recv_lock = threading.Lock()
 
@@ -84,36 +84,34 @@ class LocalNode(object):
             raise ChannelSlotError(f"Channel name {destination_name} doesn't exist")
 
         destination_node._buffer.push(self.name, message, obj)
-        destination_node.__buffer_available.set()
+        destination_node._buffer_available.set()
         self.__send_lock.release()
 
     def recv(self, source=None):
-        self.__recv_lock.acquire()
         if self._closed:
             raise ChannelClosed("Channel closed")
 
         if len(self._buffer) == 0 and not self._closed:
-            self.__buffer_available.wait()
-        self.__buffer_available.clear()
+            self._buffer_available.wait()
+        self._buffer_available.clear()
 
         if self._closed:
             raise ChannelClosed("Channel closed")
 
         source, msg, obj = self._buffer.pop(source)
-        self.__recv_lock.release()
         return source, msg, obj
 
     def close(self):
-        self.__recv_lock.acquire()
         if not self._closed:
+            self.__recv_lock.acquire()
             self._closed = True
-            self.__buffer_available.set()
+            self._buffer_available.set()
             my_slot = LocalNode.node_names.index(self.name)
             del LocalNode.node_names[my_slot]
             del LocalNode.nodes[my_slot]
             self.name = None
             del self._buffer
-        self.__recv_lock.release()
+            self.__recv_lock.release()
 
 
 class ForwardNode(LocalNode):
@@ -123,7 +121,8 @@ class ForwardNode(LocalNode):
                     socket: STCPSocket = None,
                     name: str = None,
                     implicated_die: bool = False,
-                    verbosities: tuple = {"user": ["error"], "dev": ["error"]}
+                    logger_generator: StandardLoggerGenerator = standard_logger_generator,
+                    display: tuple = {"user": ["error"], "dev": ["error"]}
                 ):
         assert node is None or isinstance(node, LocalNode)
         assert socket is None or isinstance(socket, STCPSocket)
@@ -133,10 +132,10 @@ class ForwardNode(LocalNode):
         super().__init__(name)
 
         self._implicated_die = implicated_die
-        if verbosities is None:
-            verbosities = socket.__print.verbosities
+        if display is None:
+            display = socket.__print.display
 
-        self.__print = StandardPrint(f"ForwardNode {self.name}", verbosities)
+        self.__print = logger_generator.generate(f"ForwardNode {self.name}", display)
         self._one_thread_stop = threading.Event()
 
     def set_node(self, node):
@@ -148,6 +147,7 @@ class ForwardNode(LocalNode):
         self._socket = socket
 
     def start(self):
+        self.__print("user", "info", "Start")
         if not self._node or not self._socket:
             raise Exception("ForwardNode must be initilized with both node and socket")
 
@@ -165,49 +165,64 @@ class ForwardNode(LocalNode):
             self._node.close()
             self._socket.close()
         else:
-            if self._node.__buffer_available.is_set() is False:
-                self._node.__buffer_available.set()
+            if self._node._buffer_available.is_set() is False:
+                self._node._buffer_available.set()
 
-        self.__print("user", "notification", "Stopped")
+        self.__print("user", "info", "Stopped")
 
     def _wait_message_from_remote(self):
         while not self._closed:
             try:
                 data = self._socket.recv()
             except STCPSocketClosed:
+                self.__print("dev", "info", "STCP Socket closed")
                 break
             except Exception as e:
-                self.__print("user", "error", "Unknown error")
-                self.__print("dev", "error", repr(e))
+                self.__print("user", "info", "Unknown error in waiting message from remote client")
+                self.__print("dev", "error", 
+                    "Unknown error in waiting message from remote client ({})".format(repr(e))
+                )
                 break
             if data:
                 try:
                     super().send(self._node.name, data)
                 except ChannelClosed:
-                    self.__print("user", "notification", "Channel closed")
+                    self.__print("dev", "info", "Channel closed")
                     break
-
+                except Exception as e:
+                    self.__print("user", "info", "Unknown error in sending data to node")
+                    self.__print("dev", "error", 
+                        "Unknown error in sending data to node ({})".format(repr(e))
+                    )
+                    break
         self._one_thread_stop.set()
-        self.__print("user", "notification", "Waiting from remote ended")
+        self.__print("user", "info", "Waiting from remote ended")
 
     def _wait_message_from_node(self):
         while not self._closed:
             try:
                 _, message, _ = super().recv()
-            except AttributeError:  # after close forwarder, it dont have buffer attribute --> error
+            except AttributeError as e:  # after close forwarder, it dont have buffer attribute --> error
+                self.__print("dev", "warning", "{} in waiting message from local node".format(e))
+                self.__print("user", "info", "Channel closed")
                 break
             except ChannelClosed:
-                self.__print("user", "notification", "Channel closed")
+                self.__print("user", "info", "Channel closed")
                 break
             except Exception as e:
-                self.__print("user", "error", "Unknown error")
-                self.__print("dev", "error", repr(e))
+                self.__print("user", "info", "Unknown error in waiting message from local node")
+                self.__print("dev", "error", 
+                    "Unknown error in waiting message from local node ({})".format(repr(e))
+                )
                 break
             if message:
-                self._socket.send(message)
+                try:
+                    self._socket.send(message)
+                except STCPSocketClosed:
+                    self.__print("dev", "info", "STCP Socket closed")
 
         self._one_thread_stop.set()
-        self.__print("user", "notification", "Waiting from node ended")
+        self.__print("user", "info", "Waiting from node ended")
 
     def send(self, received_node_name, message):
         raise NotImplementedError

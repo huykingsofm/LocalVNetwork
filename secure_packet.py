@@ -1,6 +1,6 @@
 import struct
 from .packet import PacketEncoder, PacketDecoder
-from .lib.cipher import cipher_from_hash, hash_name, _Cipher
+from .lib.cipher import AllCipher, hash_cls_name, _Cipher
 
 class SecurePacketException(Exception): ...
 class CipherTypeMismatch(SecurePacketException): ...
@@ -19,7 +19,7 @@ class SecurePacketEncoder(PacketEncoder):
         #                 + PARAM1_SIZE + PARAM1 + PARAM2_SIZE + PARAM2 + ...
         # TYPE_OF_CIPHER is the hash value of the cipher class
 
-        secure_header = hash_name(self.cipher) + struct.pack(">B", self.cipher.number_of_params)
+        secure_header = hash_cls_name(self.cipher) + struct.pack(">B", self.cipher.number_of_params)
 
         for i in range(self.cipher.number_of_params):
             param = self.cipher.get_param(i)
@@ -55,10 +55,15 @@ class SecurePacketDecoder(PacketDecoder):
         # SECURE HEADER: TYPE_OF_CIPHER (2 bytes) + NUMBER_OF_PARAMS(1 byte)
         #                 + PARAM1_SIZE + PARAM1 + PARAM2_SIZE + PARAM2 + ...
         cipher_hashvalue = packet[original_header_size: original_header_size + 2]
-        cipher_type = cipher_from_hash.get(cipher_hashvalue, None)
+        cipher_type = AllCipher.hash2cls(cipher_hashvalue)
 
-        if cipher_type is None or not isinstance(self.cipher, cipher_type):
-            raise CipherTypeMismatch("Cipher type is invalid")
+        if cipher_type is None:
+            raise CipherTypeMismatch("Cipher type is invalid (hash = {})".format(cipher_hashvalue))
+        if not isinstance(self.cipher, cipher_type):
+            raise CipherTypeMismatch("Cipher type mismatches (expected {}, but receive {})".format(
+                type(self.cipher).__name__,
+                cipher_type.__name__
+            ))
 
         number_of_params = struct.unpack(">B", packet[original_header_size + 2: original_header_size + 3])[0]
         current_index = original_header_size + 3

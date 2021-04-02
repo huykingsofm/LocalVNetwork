@@ -1,4 +1,4 @@
-[submodule "lib/selective_print"]
-	path = lib/selective_print
-	url = https://github.com/huykingsofm/selective_print
+[submodule "lib/logger"]
+	path = lib/logger
+	url = https://github.com/huykingsofm/logger
 	branch = main

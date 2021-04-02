@@ -76,8 +76,8 @@ class XorCipher(_Cipher):
 
         ciphertext = b''
         for c in plaintext:
-            ciphertext += chr(c ^ self.key ^ self.iv).encode()
-
+            ciphertext += int.to_bytes(c ^ self.key ^ self.iv, 1, "big")
+            
         return ciphertext
 
     def decrypt(self, ciphertext: bytes, finalize = True) -> bytes:
@@ -131,7 +131,7 @@ class AES_CTR(_Cipher):
             ciphertext = self.encryptor.update(plaintext)
             if finalize:
                 ciphertext += self.encryptor.finalize()
-        except Exception:
+        except Exception as e:
             raise e
 
         return ciphertext
@@ -291,9 +291,9 @@ class SimpleSSL(_Cipher):
     def reset_params(self):
         return self.cipher.reset_params()
 
-def hash_name(name):
-    if type(name).__name__ == 'type':
-        name = str(_class).split(".")[-1][:-2].encode()
+def hash_cls_name(name):
+    if type(name).__name__ == 'type' or type(name).__name__ == 'builtin_function_or_method':
+        name = str(name).split(".")[-1][:-2].encode()
     else:
         name = type(name).__name__.encode()
     hash_value = name[0]
@@ -304,11 +304,38 @@ def hash_name(name):
     hash_byte2 = (hash_value ^ len(name)).to_bytes(1, "big")
     return hash_byte1 + hash_byte2
 
-cipher_from_hash = {}
-for class_name in dir():
-    try:
-        _class = globals()[class_name]
-        if issubclass(_class, _Cipher):
-            cipher_from_hash[hash_name(_class)] = _class
-    except Exception as e:
-        continue
+class AllCipher(object):
+    _cipher_hashs = {}
+    _cipher_names = {}
+    _cipher_hashs_invert = {}
+    _cipher_names_invert = {}
+
+    @staticmethod
+    def add_cipher(cipher_cls):
+        assert issubclass(cipher_cls, _Cipher)
+        AllCipher._cipher_hashs[hash_cls_name(cipher_cls)] = cipher_cls
+        AllCipher._cipher_names[cipher_cls.__name__] = cipher_cls
+        AllCipher._cipher_hashs_invert[cipher_cls] = hash_cls_name(cipher_cls)
+        AllCipher._cipher_names_invert[cipher_cls] = cipher_cls.__name__
+
+    @staticmethod
+    def hash2cls(hash_value):
+        return AllCipher._cipher_hashs.get(hash_value, None)
+
+    @staticmethod
+    def name2cls(name):
+        return AllCipher._cipher_names.get(name, None)
+
+    @staticmethod
+    def cls2hash(cipher_cls):
+        return AllCipher._cipher_hashs_invert.get(cipher_cls, None)
+
+    @staticmethod
+    def cls2name(cipher_cls):
+        return AllCipher._cipher_names_invert.get(cipher_cls, None)
+
+AllCipher.add_cipher(NoCipher)
+AllCipher.add_cipher(XorCipher)
+AllCipher.add_cipher(AES_CBC)
+AllCipher.add_cipher(AES_CTR)
+AllCipher.add_cipher(SimpleSSL)

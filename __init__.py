@@ -1,2 +1,4 @@
-from .lib.cipher import NoCipher, XorCipher, AES_CBC, AES_CTR, SimpleSSL
-from .lib.selective_print import SelectivePrint, StandardPrint
+from .lib.logger import StandardLoggerGenerator
+
+LOG_FILE = "hks_network.log"
+standard_logger_generator = StandardLoggerGenerator(LOG_FILE)
