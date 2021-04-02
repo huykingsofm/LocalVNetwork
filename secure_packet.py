@@ -60,7 +60,7 @@ class SecurePacketDecoder(PacketDecoder):
         if cipher_type is None:
             raise CipherTypeMismatch("Cipher type is invalid (hash = {})".format(cipher_hashvalue))
         if not isinstance(self.cipher, cipher_type):
-            raise CipherTypeMismatch("Cipher type mismatches (expected {}, but receive {})".format(
+            raise CipherTypeMismatch("Cipher type mismatches (expected {}, but received {})".format(
                 type(self.cipher).__name__,
                 cipher_type.__name__
             ))

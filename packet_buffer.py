@@ -1,11 +1,9 @@
 import struct
 import threading
 
-from . import standard_logger_generator
-
 from .secure_packet import CipherTypeMismatch
 from .packet import CannotExtractPacket, PacketDecoder
-from .lib.logger.logger import StandardLoggerGenerator
+from .lib.logger.logger import LoggerGenerator
 
 class PacketBufferException(Exception): ...
 class PacketBufferOverflow(PacketBufferException): ...
@@ -16,9 +14,9 @@ class PacketBuffer():
                     self,
                     decoder: PacketDecoder,
                     identifier=None,
-                    logger_generator: StandardLoggerGenerator = standard_logger_generator,
-                    display: dict = {"dev": ["error"]
-                }) -> None:
+                    logger_generator: LoggerGenerator = ...,
+                    display: dict = ...
+                ) -> None:
         self._buffer = []
         self._packet_decoder = decoder
         prefix = "PacketBuffer"

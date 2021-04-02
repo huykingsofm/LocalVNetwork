@@ -4,9 +4,8 @@ import errno
 import socket
 import threading
 
-from . import standard_logger_generator
 from .lib.cipher import NoCipher
-from .lib.logger import StandardLoggerGenerator
+from .lib.logger import LoggerGenerator
 from .packet_buffer import PacketBuffer
 from .secure_packet import SecurePacketEncoder, SecurePacketDecoder
 
@@ -27,10 +26,10 @@ class STCPSocket(object):
 
     def __init__(
                     self,
-                    cipher=NoCipher(),
+                    cipher,
                     buffer_size=1024,
-                    logger_generator: StandardLoggerGenerator = standard_logger_generator,
-                    display: dict = {"dev": {"error", }, "user": {"warning"}}
+                    logger_generator: LoggerGenerator = ...,
+                    display: dict = ...,
                 ):
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.__cipher = cipher
@@ -57,7 +56,7 @@ class STCPSocket(object):
         return self._socket.__exit__(args)
 
     def _start_auto_recv(self):
-        self.__print("user", "info", "Start receiving automatically...")
+        self.__print("dev", "info", "Start receiving automatically...")
         while not self.isclosed():
             try:
                 data = self._socket.recv(self.__buffer_size)
@@ -68,33 +67,35 @@ class STCPSocket(object):
                 # self._socket.shutdown(socket.SHUT_RDWR)
                 self._socket.close()
                 if e.errno in (errno.ECONNRESET, errno.ECONNABORTED, errno.ECONNREFUSED):
+                    self.__print("dev", "info", "Automatically receiving closes normally ({})".format(repr(e)))
                     break
                 elif isinstance(e, socket.timeout):
+                    self.__print("dev", "info", "Automatically receiving closes normally (timeout and socket closed)")
                     break
                 else:
-                    self.__print("user", "info", "Connection stopped suddenly")
-                    self.__print("dev", "error", "Connection stop suddenly ({})".format(repr(e)))
+                    self.__print("dev", "error", "Connection stops suddenly ({})".format(repr(e)))
                     raise e
             except Exception as e:
                 # self._socket.shutdown(socket.SHUT_RDWR)
                 self._socket.close()
-                self.__print("user", "info", "Unknown error in automatically receiving")
                 self.__print("dev", "error", "Unknown error in automatically receiving ({})".format(repr(e)))
                 raise e
             else:
                 if not data:  # when be closed, socket will receive infinite empty packet
-                    # self._socket.shutdown(socket.SHUT_RDWR)
                     self._socket.close()
+                    self.__print("dev", "info", "Automatically receiving closes normally (remote socket closed)")
                     break
                 self.__buffer.push(data)
                 self.__buffer_available.set()
         self.__buffer_available.set()
-        self.__print("user", "info", "Stop receiving automatically...")
+        self.__print("dev", "info", "Stop receiving automatically...")
 
     def set_recv_timeout(self, value: float):
+        self.__print("dev", "info", "Set receive timeout to {}".format(value))
         self.__recv_timeout = value
 
     def settimeout(self, value: float):
+        self.__print("dev", "info", "Set timeout to {}".format(value))
         return self._socket.settimeout(value)
 
     def setreloadtime(self, reloadtime: float):
@@ -158,20 +159,23 @@ class STCPSocket(object):
 
     def listen(self, __backlog: int = 0):
         self.__print("user", "info", "Server listen...")
+        self.__print("dev", "info", "Server listen...")
         return self._socket.listen(__backlog)
 
     def accept(self):
         socket, addr = self._socket.accept()
         socket.settimeout(STCPSocket.DEFAULT_TIME_OUT)  # timeout for non-blocking socket
         self.__print("user", "info", "Server accept {}".format(addr))
+        self.__print("dev", "info", "Server accept {}".format(addr))
         socket = self._fromsocket(socket, addr, start_serve=True)
         return socket, addr
 
     def connect(self, address):
         ret = self._socket.connect(address)
-
         self._socket.settimeout(STCPSocket.DEFAULT_TIME_OUT)  # timeout for non-blocking socket
-
+        
+        self.__print("user", "info", "Connect to server {} successfully".format(address))
+        self.__print("dev", "info", "Connect to server {} successfully".format(address))
         self._stop_auto_recv = False
         self.__print = self._logger_generator.generate(f"STCP Socket {address}", self._display)
         server = threading.Thread(target=self._start_auto_recv)
@@ -189,6 +193,7 @@ class STCPSocket(object):
     def close(self):
         self.__buffer_available.set()
         self._stop_auto_recv = True
+        self.__print("user", "info", "Prepare to disconnect from server")
 
     def isclosed(self):
         return self._socket._closed
