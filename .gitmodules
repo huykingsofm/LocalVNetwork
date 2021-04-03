@@ -1,4 +1,0 @@
-[submodule "lib/logger"]
-	path = lib/logger
-	url = https://github.com/huykingsofm/logger
-	branch = main

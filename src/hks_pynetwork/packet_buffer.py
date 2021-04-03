@@ -1,9 +1,9 @@
 import struct
 import threading
 
-from .secure_packet import CipherTypeMismatch
-from .packet import CannotExtractPacket, PacketDecoder
-from .lib.logger.logger import LoggerGenerator
+from hks_pylib.logger import LoggerGenerator
+from hks_pynetwork.secure_packet import CipherTypeMismatch
+from hks_pynetwork.packet import CannotExtractPacket, PacketDecoder
 
 class PacketBufferException(Exception): ...
 class PacketBufferOverflow(PacketBufferException): ...

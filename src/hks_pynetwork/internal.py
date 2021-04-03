@@ -1,7 +1,7 @@
 import random
 import threading
-from .external import STCPSocket, STCPSocketClosed
-from .lib.logger import LoggerGenerator
+from hks_pylib.logger import LoggerGenerator
+from hks_pynetwork.external import STCPSocket, STCPSocketClosed
 
 class ChannelException(Exception): ...
 class ChannelSlotError(ChannelException): ...
@@ -78,7 +78,7 @@ class LocalNode(object):
             name,
             display
         )
-        self._print("dev", "info", "The node {} join to Local Node".format(name))
+        self._print("dev", "info", "The node join to Local Node")
 
     def send(self, destination_name: str, message: bytes, obj: object = None):
         self.__send_lock.acquire()
@@ -120,10 +120,12 @@ class LocalNode(object):
             my_slot = LocalNode.node_names.index(self.name)
             del LocalNode.node_names[my_slot]
             del LocalNode.nodes[my_slot]
-            self.name = None
             del self._buffer
-            self._print("dev", "info", "The node {} leaves from Local Node".format(self.name))
+            self.name = None
             self.__recv_lock.release()
+            self._print("dev", "info", "The node leaves from Local Node")
+        else:
+            self._print("dev", "warning", "Call close() when channel closed")
 
 
 class ForwardNode(LocalNode):

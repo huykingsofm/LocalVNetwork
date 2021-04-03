@@ -4,15 +4,15 @@ import errno
 import socket
 import threading
 
-from .lib.cipher import NoCipher
-from .lib.logger import LoggerGenerator
-from .packet_buffer import PacketBuffer
-from .secure_packet import SecurePacketEncoder, SecurePacketDecoder
+from hks_pylib.logger import LoggerGenerator
+from hks_pynetwork.packet_buffer import PacketBuffer
+from hks_pylib.cipher import AllCipher, _Cipher
+from hks_pynetwork.secure_packet import SecurePacketEncoder, SecurePacketDecoder
 
 # Exception
-from .lib.cipher import DecryptFailed
-from .packet import CannotExtractPacket
-from .secure_packet import CipherTypeMismatch
+from hks_pylib.cipher import DecryptFailed
+from hks_pynetwork.packet import CannotExtractPacket
+from hks_pynetwork.secure_packet import CipherTypeMismatch
 
 
 class STCPSocketException(Exception): ...
@@ -21,21 +21,33 @@ class STCPSocketTimeout(STCPSocketException): ...
 
 
 class STCPSocket(object):
-    DEFAULT_RELOAD_TIME = 0.000001
     DEFAULT_TIME_OUT = 0.1
 
     def __init__(
                     self,
-                    cipher,
-                    buffer_size=1024,
+                    cipher: _Cipher,
+                    buffer_size: int = 1024,
+                    reload_time: float = 0.001,
                     logger_generator: LoggerGenerator = ...,
                     display: dict = ...,
+                    name: str="STCP Socket Listener",
                 ):
+        assert isinstance(cipher, _Cipher)
+        assert isinstance(buffer_size, int)
+        assert isinstance(reload_time, float)
+        assert isinstance(logger_generator, LoggerGenerator)
+        assert isinstance(display, dict)
+        assert isinstance(name, str)
+
+        self._logger_generator = logger_generator
+        self._display = display
+        self.__print = self._logger_generator.generate(name, self._display)
+
+        self.__print("dev", "debug", "Initialized with cipher {}".format(AllCipher.cls2name(type(cipher))))
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.__cipher = cipher
         self.__cipher.reset_params()
-        self._display = display
-        self.__reload_time = STCPSocket.DEFAULT_RELOAD_TIME
+        self.set_reload_time(reload_time)
         self.__recv_timeout = None
 
         self.__packet_encoder = SecurePacketEncoder(self.__cipher)
@@ -46,8 +58,6 @@ class STCPSocket(object):
         self.__buffer_available = threading.Event()
         self._stop_auto_recv = False
 
-        self._logger_generator = logger_generator
-        self.__print = self._logger_generator.generate("STCP Socket Listener", display)
 
     def __enter__(self):
         return self
@@ -56,7 +66,7 @@ class STCPSocket(object):
         return self._socket.__exit__(args)
 
     def _start_auto_recv(self):
-        self.__print("dev", "info", "Start receiving automatically...")
+        self.__print("dev", "info", "Start automatically receiving...")
         while not self.isclosed():
             try:
                 data = self._socket.recv(self.__buffer_size)
@@ -88,14 +98,18 @@ class STCPSocket(object):
                 self.__buffer.push(data)
                 self.__buffer_available.set()
         self.__buffer_available.set()
-        self.__print("dev", "info", "Stop receiving automatically...")
+        self.__print("dev", "info", "Stop automatically receiving...")
+
+    def set_reload_time(self, value: float):
+        self.__print("dev", "debug", "Set reload time to {}".format(value))
+        self.__reload_time = value
 
     def set_recv_timeout(self, value: float):
-        self.__print("dev", "info", "Set receive timeout to {}".format(value))
+        self.__print("dev", "debug", "Set receive timeout to {}".format(value))
         self.__recv_timeout = value
 
     def settimeout(self, value: float):
-        self.__print("dev", "info", "Set timeout to {}".format(value))
+        self.__print("dev", "debug", "Set timeout to {}".format(value))
         return self._socket.settimeout(value)
 
     def setreloadtime(self, reloadtime: float):
@@ -172,12 +186,14 @@ class STCPSocket(object):
 
     def connect(self, address):
         ret = self._socket.connect(address)
-        self._socket.settimeout(STCPSocket.DEFAULT_TIME_OUT)  # timeout for non-blocking socket
-        
         self.__print("user", "info", "Connect to server {} successfully".format(address))
         self.__print("dev", "info", "Connect to server {} successfully".format(address))
-        self._stop_auto_recv = False
+        self.__print("dev", "debug", "Transform to STCP Socket {}".format(address))
+
         self.__print = self._logger_generator.generate(f"STCP Socket {address}", self._display)
+        self.settimeout(STCPSocket.DEFAULT_TIME_OUT)  # timeout for non-blocking socket
+        
+        self._stop_auto_recv = False
         server = threading.Thread(target=self._start_auto_recv)
         server.setDaemon(False)
         server.start()
@@ -191,9 +207,12 @@ class STCPSocket(object):
         return ret
 
     def close(self):
-        self.__buffer_available.set()
-        self._stop_auto_recv = True
-        self.__print("user", "info", "Prepare to disconnect from server")
+        if self.__buffer is None:  # STCP Listener
+            self._socket.close()
+        else:
+            self.__buffer_available.set()
+            self._stop_auto_recv = True
+        self.__print("dev", "info", "Closed")
 
     def isclosed(self):
         return self._socket._closed
@@ -204,10 +223,10 @@ class STCPSocket(object):
             cipher=cipher, 
             buffer_size=self.__buffer_size,
             logger_generator=self._logger_generator,
-            display=self._display
+            display=self._display,
+            name=f"STCP Socket {address}"
         )
         new_socket._socket = socket
-        new_socket.__print = self._logger_generator.generate(f"STCP Socket {address}", self._display)
         new_socket.__buffer = PacketBuffer(
             decoder=new_socket.__packet_decoder,
             identifier=address,
