@@ -1,4 +1,0 @@
-[submodule "CustomPrint"]
-	path = CustomPrint
-	url = https://github.com/huykingsofm/CustomPrint
-	branch = main
