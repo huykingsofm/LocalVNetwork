@@ -1,16 +1,16 @@
 # hks_pynetwork
-A Python library is built for communication between objects in internal or external programs.
+A Python library is built to communicate between objects in internal or external programs.
 
 # How to build
-We are assuming that your code is running on the Python 3.7.1. If you meet any problems, even if with other versions, let [create an issue](https://github.com/huykingsofm/hks_pylib/issues) to notify us. We will solve them as quick as possible.  
+Our library is only supported by Python 3. Now we test it only on Python 3.7.1. If you meet any problems, even if with other versions, you could [create an issue](https://github.com/huykingsofm/hks_pylib/issues) to notify us. We will solve them as quickly as possible.  
 
-## Create Virtual Enviroment (optional but IMPORTANT)
-*If you had your own virtual enviroment, you can ignore this step.* 
+## Create Virtual Environment (optional but IMPORTANT)
+*If you had your virtual environment, you can ignore this step.* 
 
-You should create a virtual enviroment to avoid conflicting with other applications on your machine when installing our module. The virtual enviroment should be installed with [Python 3.7.1](https://www.python.org/downloads/release/python-371/) (you can use other Python versions but we can't ensure that unexpected errors will not appear suddenly).  
-I highly recommend you to use [Anaconda](https://www.anaconda.com/products/individual) because of its utilities. The command of creating virtual enviroment in Anaconda is:
+You ought to create a virtual environment to avoid conflicting with other applications on your machine when installing our module. The virtual environment must be installed with [Python 3](https://www.python.org/downloads).  
+I highly recommend you to use [Anaconda](https://www.anaconda.com/products/individual) because of its utilities. The command of creating a virtual environment in Anaconda is:
 ```bash
-$ conda create -n your_venv_name python=3.7.1
+$ conda create -n your_venv_name
 $ conda activate your_venv_name
 (your_venv_name) $ _ 
 ```
@@ -22,20 +22,22 @@ $ path/to/your/venv/Scripts/activate.bat
 (your_venv_name) $ _
 ```
 
-## Method 1: Install the most stable version
+## Method 1: Install the PyPI version (not completed yet)
 ```bash
 (your_venv_name) $ pip install hks_pynetwork
 ```
 
-## Method 2: Install the newest version
+## Method 2: Install the newest version (recommendation)
 
 ```bash
-(your_venv_name) $ pip install -r requirements.txt
-(your_venv_name) $ pip install -e .
+
+(your_venv_name) $ git clone https://github.com/huykingsofm/hks_pynetwork.git
+(your_venv_name) $ cd hks_pynetwork
+(your_venv_name) hks_pynetwork $ pip install -e .
 ```
 
 # How to use
-Just use `import` statement and enjoy it. We will write documentations and tutorials as soon as possible so that you can understand our library easier.
+Just use `import` statement and enjoy it. We will write documentation and tutorials as soon as possible so that you can understand our library easier.
 
 ```python
 from hks_pynetwork import internal

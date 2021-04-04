@@ -1,1 +1,1 @@
-hks_pylib==0.0.2
+hks-pylib==0.0.2
