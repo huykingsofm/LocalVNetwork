@@ -172,8 +172,8 @@ class STCPSocket(object):
         return self._socket.bind(address)
 
     def listen(self, __backlog: int = 0):
-        self.__print("user", "info", "Server listen...")
-        self.__print("dev", "info", "Server listen...")
+        self.__print("user", "info", "Server listening...")
+        self.__print("dev", "info", "Server listening...")
         return self._socket.listen(__backlog)
 
     def accept(self):
