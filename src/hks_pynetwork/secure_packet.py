@@ -1,6 +1,7 @@
 import struct
 from hks_pynetwork.packet import PacketEncoder, PacketDecoder
-from hks_pylib.cipher import AllCipher, hash_cls_name, _Cipher
+from hks_pylib.cryptography.cipherid import CipherID, hash_cls_name
+from hks_pylib.cryptography._cipher import HKSCipher
 
 class SecurePacketException(Exception): ...
 class CipherTypeMismatch(SecurePacketException): ...
@@ -8,7 +9,7 @@ class CipherTypeMismatch(SecurePacketException): ...
 
 class SecurePacketEncoder(PacketEncoder):
     # A packet generator encrypting by AES-256 and hashing by MD5
-    def __init__(self, cipher: _Cipher):
+    def __init__(self, cipher: HKSCipher):
         self.cipher = cipher
 
     def __call__(self, payload: bytes):
@@ -19,9 +20,9 @@ class SecurePacketEncoder(PacketEncoder):
         #                 + PARAM1_SIZE + PARAM1 + PARAM2_SIZE + PARAM2 + ...
         # TYPE_OF_CIPHER is the hash value of the cipher class
 
-        secure_header = hash_cls_name(self.cipher) + struct.pack(">B", self.cipher.number_of_params)
+        secure_header = hash_cls_name(self.cipher) + struct.pack(">B", self.cipher._number_of_params)
 
-        for i in range(self.cipher.number_of_params):
+        for i in range(self.cipher._number_of_params):
             param = self.cipher.get_param(i)
 
             if not isinstance(param, bytes):
@@ -43,7 +44,7 @@ class SecurePacketEncoder(PacketEncoder):
 
 class SecurePacketDecoder(PacketDecoder):
     # A packet generator encrypting by AES-256 and hashing by MD5
-    def __init__(self, cipher: _Cipher):
+    def __init__(self, cipher: HKSCipher):
         self.cipher = cipher
 
     def __call__(self, packet: bytes):
@@ -55,7 +56,7 @@ class SecurePacketDecoder(PacketDecoder):
         # SECURE HEADER: TYPE_OF_CIPHER (2 bytes) + NUMBER_OF_PARAMS(1 byte)
         #                 + PARAM1_SIZE + PARAM1 + PARAM2_SIZE + PARAM2 + ...
         cipher_hashvalue = packet[original_header_size: original_header_size + 2]
-        cipher_type = AllCipher.hash2cls(cipher_hashvalue)
+        cipher_type = CipherID.hash2cls(cipher_hashvalue)
 
         if cipher_type is None:
             raise CipherTypeMismatch("Cipher type is invalid (hash = {})".format(cipher_hashvalue))
@@ -75,6 +76,6 @@ class SecurePacketDecoder(PacketDecoder):
             current_index += param_size
 
             self.cipher.set_param(i, param)
-
+        self.cipher.reset(False)
         packet_dict["payload"] = self.cipher.decrypt(packet_dict["payload"])
         return packet_dict

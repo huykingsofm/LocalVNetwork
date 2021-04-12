@@ -2,7 +2,7 @@
 A Python library is built to communicate between objects in internal or external programs.
 
 # How to build
-Our library is only supported by Python 3. Now we test it only on Python 3.7.1. If you meet any problems, even if with other versions, you could [create an issue](https://github.com/huykingsofm/hks_pynetwork/issues) to notify us. We will solve them as quickly as possible.  
+Our library is only supported by Python >=3.7.1. Now we test it only on Python 3.7.1. If you meet any problems, even if with other versions, you could [create an issue](https://github.com/huykingsofm/hks_pynetwork/issues) to notify us. We will solve them as quickly as possible.  
 
 ## Create Virtual Environment (optional but IMPORTANT)
 *If you had your virtual environment, you can ignore this step.* 
@@ -22,15 +22,14 @@ $ path/to/your/venv/Scripts/activate.bat
 (your_venv_name) $ _
 ```
 
-## Method 1: Install the PyPI version (not completed yet)
+## Method 1: Install the stablest version (PyPI)
 ```bash
 (your_venv_name) $ pip install hks_pynetwork
 ```
 
-## Method 2: Install the newest version (recommendation)
+## Method 2: Install the newest version (Github)
 
 ```bash
-
 (your_venv_name) $ git clone https://github.com/huykingsofm/hks_pynetwork.git
 (your_venv_name) $ cd hks_pynetwork
 (your_venv_name) hks_pynetwork $ pip install -e .
