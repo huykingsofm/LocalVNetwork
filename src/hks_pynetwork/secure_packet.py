@@ -6,7 +6,7 @@ from hks_pylib.cryptography.ciphers.cipherid import CipherID, hash_cls_name
 from hks_pynetwork.packet import MIN_HEADER_SIZE, PacketEncoder, PacketDecoder
 
 from hks_pynetwork.errors.secure_packet import CipherTypeMismatchError
-
+ 
 
 class SecurePacketEncoder(PacketEncoder):
     def __init__(self, cipher: HKSCipher):

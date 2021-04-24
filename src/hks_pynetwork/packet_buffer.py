@@ -79,7 +79,7 @@ class PacketBuffer():
                         self._expected_current_packet_size :
                     ]
                 self.push(apart_of_next_packet, append_to_end=False)
-
+ 
             self._current_packet = b""
             self._current_packet_size = 0
             self._expected_current_packet_size = 0

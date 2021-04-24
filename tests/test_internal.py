@@ -6,7 +6,7 @@ from hks_pynetwork.internal import LocalNode, ForwardNode
 from hks_pylib.logger import StandardLoggerGenerator
 from hks_pynetwork.external import STCPSocket
 from hks_pylib.cryptography.ciphers.symmetrics import AES_CTR, AES_CBC
-
+ 
 logger_generator = StandardLoggerGenerator("tests/test_internal.log")
 KEY = os.urandom(32)
 N_SAMPLE_DATA = random.randint(10, 20)

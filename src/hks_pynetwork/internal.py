@@ -67,7 +67,7 @@ class LocalNode(object):
         self.name = name
         self._buffer = ChannelBuffer()
         self._closed = False
-
+ 
         self._buffer_available = threading.Event()
         self.__send_lock = threading.Lock()
         self.__recv_lock = threading.Lock()

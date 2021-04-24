@@ -78,7 +78,7 @@ class STCPSocket(object):
             except socket.error as e:
                 if isinstance(e, socket.timeout) and not self._stop_auto_recv:
                     continue
-
+ 
                 self._socket.close()
                 if e.errno in (errno.ECONNRESET, errno.ECONNABORTED, errno.ECONNREFUSED):
                     self._log("dev", "info", "Automatic receiving closes "

@@ -70,7 +70,7 @@ class PacketDecoder(object):
 
         if len(packet) < header_size + payload_size:
             raise IncompletePacketError("Incomplete packet.")
-
+ 
         packet_dict = header
         packet_dict["payload"] = packet[header_size: header_size + payload_size]
         packet_dict["packet_size"] = header_size + payload_size

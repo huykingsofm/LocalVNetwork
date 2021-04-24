@@ -5,7 +5,7 @@ import threading
 from hks_pynetwork.external import STCPSocket
 from hks_pylib.cryptography.ciphers.symmetrics import AES_CTR, AES_CBC
 from hks_pylib.logger import StandardLoggerGenerator
-
+ 
 logger_generator = StandardLoggerGenerator("tests/test_external.log")
 KEY = os.urandom(32)
 N_SAMPLE_DATA = random.randint(10, 20)
