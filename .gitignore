@@ -1,0 +1,9 @@
+pyproject.toml
+.eggs/
+.pytest_cache/
+.vscode/
+build/
+dist/
+*.egg-info/
+*__pycache__/
+*log 

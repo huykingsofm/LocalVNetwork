@@ -1,40 +1,55 @@
 import struct
 
-MAX_LENGTH = 65535 + 4294967295
+from hks_pynetwork.errors.packet import IncompletePacketError, PacketSizeError
 
 
-class PacketException(Exception): ...
-class CannotExtractPacket(PacketException): ...
+MAX_HEADER_SIZE = 65535
+MAX_PAYLOAD_SIZE = 4294967295
+MAX_PACKET_SIZE = MAX_HEADER_SIZE + MAX_PAYLOAD_SIZE
+
+MIN_HEADER_SIZE = 6
 
 
 class PacketEncoder(object):
-    @staticmethod
-    def pack(payload: bytes):
-        if isinstance(payload, bytes) is False:
-            raise Exception("Payload must be a byte object")
+    def encode(self, payload: bytes):
+        assert isinstance(payload, bytes)
+
+        if len(payload) > MAX_PAYLOAD_SIZE:
+            raise PacketSizeError("Payload size is too large "
+                "(expected < {}).".format(MAX_PAYLOAD_SIZE))
 
         # PACKET = HEADER + PAYLOAD
         # HEADER = HEADER_SIZE(2 bytes) + PAYLOAD_SIZE(4 byte) + OPTIONAL_HEADER
         # ==> PACKET = HERDER_SIZE + PAYLOAD_SIZE + OPTIONAL_HEADER + PAYLOAD
 
-        # header struct except for header_size
         header_struct = ">HI"
+
         header_dummy = struct.pack(header_struct, 0, 0)
         header_size = len(header_dummy)
+
         header = struct.pack(header_struct, header_size, len(payload))
 
         return header + payload
 
 
 class PacketDecoder(object):
-    @staticmethod
-    def _decode_header(packet: bytes):
-        if isinstance(packet, bytes) is False:
-            raise Exception("Packet must be a bytes object")
+    def get_header(self, packet: bytes):
+        assert isinstance(packet, bytes)
 
-        header_size, payload_size = struct.unpack(">HI", packet[:6])
+        if len(packet) > MAX_PACKET_SIZE:
+            raise PacketSizeError("Packet size is too large "
+                "(expected < {}).".format(MAX_PACKET_SIZE))
+
+        if len(packet) < MIN_HEADER_SIZE:
+            raise IncompletePacketError("Incomplete header.")
+
+        header_size, payload_size = struct.unpack(">HI", packet[:MIN_HEADER_SIZE])
+        if header_size > MAX_HEADER_SIZE:
+            raise PacketSizeError("Header size is too large "
+                "(expected < {}).".format(MAX_HEADER_SIZE))
+
         if len(packet) < header_size:
-            raise CannotExtractPacket("Incomplete header")
+            raise IncompletePacketError("Incomplete header.")
 
         header_dict = {}
         header_dict["header_size"] = header_size
@@ -42,20 +57,20 @@ class PacketDecoder(object):
 
         return header_dict
 
-    @staticmethod
-    def unpack(packet: bytes):
-        if isinstance(packet, bytes) is False:
-            raise Exception("Packet must be a bytes object")
+    def decode(self, packet: bytes):
+        assert isinstance(packet, bytes)
 
-        try:
-            header = PacketDecoder._decode_header(packet)
-        except Exception as e:
-            raise e
+        header = self.get_header(packet)
 
         header_size, payload_size = header["header_size"], header["payload_size"]
-        if len(packet) < header_size + payload_size:
-            raise CannotExtractPacket("Incomplete packet")
+        
+        if payload_size > MAX_PAYLOAD_SIZE:
+            raise PacketSizeError("Payload size is too large "
+                "(expected < {}).".format(MAX_PAYLOAD_SIZE))
 
+        if len(packet) < header_size + payload_size:
+            raise IncompletePacketError("Incomplete packet.")
+ 
         packet_dict = header
         packet_dict["payload"] = packet[header_size: header_size + payload_size]
         packet_dict["packet_size"] = header_size + payload_size
