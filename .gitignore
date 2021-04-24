@@ -1,13 +1,9 @@
 pyproject.toml
-requirents.txt
 .eggs/
 .pytest_cache/
 .vscode/
 build/
 dist/
-src/hks_pynetwork/__pycache__/
-src/hks_pynetwork.egg-info/
-tests/__pycache__/
-tests/test_external.log
-tests/test_internal.log
-src/hks_pynetwork_huykingsofm.egg-info/
+*.egg-info/
+*__pycache__/
+*log

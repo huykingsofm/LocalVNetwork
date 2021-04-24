@@ -9,13 +9,14 @@ MAX_PACKET_SIZE = MAX_HEADER_SIZE + MAX_PAYLOAD_SIZE
 
 MIN_HEADER_SIZE = 6
 
+
 class PacketEncoder(object):
     def encode(self, payload: bytes):
         assert isinstance(payload, bytes)
+
         if len(payload) > MAX_PAYLOAD_SIZE:
             raise PacketSizeError("Payload size is too large "
                 "(expected < {}).".format(MAX_PAYLOAD_SIZE))
-
 
         # PACKET = HEADER + PAYLOAD
         # HEADER = HEADER_SIZE(2 bytes) + PAYLOAD_SIZE(4 byte) + OPTIONAL_HEADER

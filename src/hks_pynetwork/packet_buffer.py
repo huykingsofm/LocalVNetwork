@@ -31,10 +31,12 @@ class PacketBuffer():
 
     def push(self, packet: bytes, append_to_end: bool = True):
         self._push_lock.acquire()
+
         if append_to_end:
             self._buffer.append(packet)
         else:
             self._buffer.insert(0, packet)
+
         self._push_lock.release()
 
     def pop(self):
