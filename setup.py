@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="hks_pynetwork",
-    version="0.0.2",
+    version="0.0.4",
     author="huykingsofm",
     author_email="huykingsofm@gmail.com",
     description="A Python library is built to communicate between objects in internal or external programs.",
@@ -24,7 +24,7 @@ setuptools.setup(
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
     python_requires=">=3.7.1",
-    install_requires=["hks_pylib==0.0.4"],
+    install_requires=["hks_pylib==0.0.5"],
     setup_requires=["pytest-runner==4.4"],
     tests_require=["pytest==4.4.1", "pytest-parallel==0.1.0"],
     test_suite="tests",

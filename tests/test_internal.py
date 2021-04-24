@@ -5,7 +5,7 @@ import threading
 from hks_pynetwork.internal import LocalNode, ForwardNode
 from hks_pylib.logger import StandardLoggerGenerator
 from hks_pynetwork.external import STCPSocket
-from hks_pylib.cryptography.symmetrics import AES_CTR, AES_CBC
+from hks_pylib.cryptography.ciphers.symmetrics import AES_CTR, AES_CBC
 
 logger_generator = StandardLoggerGenerator("tests/test_internal.log")
 KEY = os.urandom(32)
@@ -63,6 +63,8 @@ def test_local_node():
 def server():
     server = STCPSocket(
         cipher=AES_CTR(KEY),
+        name="Server",
+        buffer_size=1024,
         logger_generator=logger_generator,
         display={"user": ["warning", "info"], "dev": ["info", "warning", "error", "debug"]}
     )
@@ -88,6 +90,8 @@ def server():
 def client():
     client = STCPSocket(
         cipher=AES_CTR(KEY),
+        name="Client",
+        buffer_size=1024,
         logger_generator=logger_generator,
         display={"user": ["warning", "info"], "dev": ["info", "warning", "error", "debug"]}
     )

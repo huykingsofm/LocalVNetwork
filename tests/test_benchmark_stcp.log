@@ -1,0 +1,142 @@
+15/04/2021 01:13:05 DEBUG [STCP Socket Listener] - Initialized with cipher AES_CTR
+15/04/2021 01:13:05 DEBUG [STCP Socket Listener] - Initialized with cipher AES_CTR
+15/04/2021 01:13:05 DEBUG [STCP Socket Listener] - Set reload time to 0.001
+15/04/2021 01:13:05 INFO [STCP Socket Listener] - Server listen...
+15/04/2021 01:13:05 DEBUG [STCP Socket Listener] - Set reload time to 0.001
+15/04/2021 01:13:05 INFO [STCP Socket Listener] - Server accept ('127.0.0.1', 30359)
+15/04/2021 01:13:05 DEBUG [STCP Socket ('127.0.0.1', 30359)] - Initialized with cipher AES_CTR
+15/04/2021 01:13:05 DEBUG [STCP Socket ('127.0.0.1', 30359)] - Set reload time to 0.001
+15/04/2021 01:13:05 INFO [STCP Socket Listener] - Connect to server ('127.0.0.1', 9999) successfully
+15/04/2021 01:13:05 DEBUG [STCP Socket Listener] - Transform to STCP Socket ('127.0.0.1', 9999)
+15/04/2021 01:13:05 DEBUG [STCP Socket ('127.0.0.1', 9999)] - Set timeout to 0.1
+15/04/2021 01:13:05 INFO [STCP Socket ('127.0.0.1', 30359)] - Start automatically receiving...
+15/04/2021 01:13:05 INFO [STCP Socket ('127.0.0.1', 9999)] - Start automatically receiving...
+15/04/2021 01:13:58 DEBUG [STCP Socket Listener] - Initialized with cipher AES_CTR
+15/04/2021 01:13:58 DEBUG [STCP Socket Listener] - Initialized with cipher AES_CTR
+15/04/2021 01:13:58 DEBUG [STCP Socket Listener] - Set reload time to 0.001
+15/04/2021 01:13:58 DEBUG [STCP Socket Listener] - Set reload time to 0.001
+15/04/2021 01:13:58 INFO [STCP Socket Listener] - Server listen...
+15/04/2021 01:13:59 INFO [STCP Socket Listener] - Connect to server ('127.0.0.1', 9999) successfully
+15/04/2021 01:13:59 DEBUG [STCP Socket Listener] - Transform to STCP Socket ('127.0.0.1', 9999)
+15/04/2021 01:13:59 INFO [STCP Socket Listener] - Server accept ('127.0.0.1', 30371)
+15/04/2021 01:13:59 DEBUG [STCP Socket ('127.0.0.1', 9999)] - Set timeout to 0.1
+15/04/2021 01:13:59 DEBUG [STCP Socket ('127.0.0.1', 30371)] - Initialized with cipher AES_CTR
+15/04/2021 01:13:59 INFO [STCP Socket ('127.0.0.1', 9999)] - Start automatically receiving...
+15/04/2021 01:13:59 DEBUG [STCP Socket ('127.0.0.1', 30371)] - Set reload time to 0.001
+15/04/2021 01:13:59 INFO [STCP Socket ('127.0.0.1', 30371)] - Start automatically receiving...
+15/04/2021 01:13:59 INFO [STCP Socket ('127.0.0.1', 30371)] - Automatic receiving closes normally (remote socket closed)
+15/04/2021 01:13:59 INFO [STCP Socket ('127.0.0.1', 30371)] - Closed
+15/04/2021 01:13:59 INFO [STCP Socket ('127.0.0.1', 30371)] - Stop automatic receiving...
+15/04/2021 01:13:59 INFO [STCP Socket ('127.0.0.1', 9999)] - Automatic receiving closes normally (remote socket closed)
+15/04/2021 01:13:59 INFO [STCP Socket ('127.0.0.1', 9999)] - Stop automatic receiving...
+15/04/2021 09:33:32 DEBUG [Server] - Initialized with cipher AES_CTR
+15/04/2021 09:33:32 DEBUG [Server] - Set reload time to 0.1
+15/04/2021 09:33:32 DEBUG [Server] - Set receive timeout to None
+15/04/2021 09:33:32 INFO [Server] - Server listen...
+15/04/2021 09:33:32 DEBUG [Client] - Initialized with cipher AES_CTR
+15/04/2021 09:33:32 DEBUG [Client] - Set reload time to 0.1
+15/04/2021 09:33:32 DEBUG [Client] - Set receive timeout to None
+15/04/2021 09:33:32 INFO [Server] - Server accept ('127.0.0.1', 34185)
+15/04/2021 09:33:32 DEBUG [STCP Socket ('127.0.0.1', 34185)] - Initialized with cipher AES_CTR
+15/04/2021 09:33:32 DEBUG [STCP Socket ('127.0.0.1', 34185)] - Set reload time to 0.1
+15/04/2021 09:33:32 DEBUG [STCP Socket ('127.0.0.1', 34185)] - Set receive timeout to None
+15/04/2021 09:33:32 INFO [Client] - Connect to server ('127.0.0.1', 9999) successfully
+15/04/2021 09:33:32 DEBUG [Client] - Transform to STCP Socket ('127.0.0.1', 9999)
+15/04/2021 09:33:32 DEBUG [STCP Socket ('127.0.0.1', 9999)] - Set timeout to 0.1
+15/04/2021 09:33:32 INFO [STCP Socket ('127.0.0.1', 34185)] - Start automatically receiving...
+15/04/2021 09:33:32 INFO [STCP Socket ('127.0.0.1', 9999)] - Start automatically receiving...
+15/04/2021 09:33:33 INFO [STCP Socket ('127.0.0.1', 34185)] - Automatic receiving closes normally (remote socket closed)
+15/04/2021 09:33:33 INFO [STCP Socket ('127.0.0.1', 34185)] - Stop automatic receiving...
+15/04/2021 09:33:33 INFO [STCP Socket ('127.0.0.1', 34185)] - Closed
+15/04/2021 09:33:33 INFO [STCP Socket ('127.0.0.1', 9999)] - Automatic receiving closes normally (remote socket closed)
+15/04/2021 09:33:33 INFO [STCP Socket ('127.0.0.1', 9999)] - Stop automatic receiving...
+15/04/2021 09:33:46 DEBUG [Server] - Initialized with cipher AES_CTR
+15/04/2021 09:33:46 DEBUG [Client] - Initialized with cipher AES_CTR
+15/04/2021 09:33:46 DEBUG [Client] - Set reload time to 0.1
+15/04/2021 09:33:46 DEBUG [Client] - Set receive timeout to None
+15/04/2021 09:33:46 DEBUG [Server] - Set reload time to 0.1
+15/04/2021 09:33:46 DEBUG [Server] - Set receive timeout to None
+15/04/2021 09:35:19 DEBUG [Server] - Initialized with cipher AES_CTR
+15/04/2021 09:35:19 DEBUG [Client] - Initialized with cipher AES_CTR
+15/04/2021 09:35:19 DEBUG [Client] - Set reload time to 0.1
+15/04/2021 09:35:19 DEBUG [Client] - Set receive timeout to None
+15/04/2021 09:35:19 DEBUG [Server] - Set reload time to 0.1
+15/04/2021 09:35:19 DEBUG [Server] - Set receive timeout to None
+15/04/2021 09:35:19 INFO [Server] - Server listen...
+15/04/2021 09:35:19 INFO [Client] - Connect to server ('127.0.0.1', 9999) successfully
+15/04/2021 09:35:19 INFO [Server] - Server accept ('127.0.0.1', 34230)
+15/04/2021 09:35:19 DEBUG [Client] - Transform to STCP Socket ('127.0.0.1', 9999)
+15/04/2021 09:35:19 DEBUG [STCP Socket ('127.0.0.1', 34230)] - Initialized with cipher AES_CTR
+15/04/2021 09:35:19 DEBUG [STCP Socket ('127.0.0.1', 9999)] - Set timeout to 0.1
+15/04/2021 09:35:19 DEBUG [STCP Socket ('127.0.0.1', 34230)] - Set reload time to 0.1
+15/04/2021 09:35:19 DEBUG [STCP Socket ('127.0.0.1', 34230)] - Set receive timeout to None
+15/04/2021 09:35:19 INFO [STCP Socket ('127.0.0.1', 9999)] - Start automatically receiving...
+15/04/2021 09:35:19 INFO [STCP Socket ('127.0.0.1', 34230)] - Start automatically receiving...
+15/04/2021 09:35:21 INFO [STCP Socket ('127.0.0.1', 34230)] - Closed
+15/04/2021 09:35:21 INFO [STCP Socket ('127.0.0.1', 34230)] - Automatic receiving closes normally (remote socket closed)
+15/04/2021 09:35:21 INFO [STCP Socket ('127.0.0.1', 34230)] - Stop automatic receiving...
+15/04/2021 09:35:21 INFO [STCP Socket ('127.0.0.1', 9999)] - Automatic receiving closes normally (remote socket closed)
+15/04/2021 09:35:21 INFO [STCP Socket ('127.0.0.1', 9999)] - Stop automatic receiving...
+15/04/2021 09:35:55 DEBUG [Server] - Initialized with cipher AES_CTR
+15/04/2021 09:35:55 DEBUG [Client] - Initialized with cipher AES_CTR
+15/04/2021 09:35:55 DEBUG [Server] - Set reload time to 0.1
+15/04/2021 09:35:55 DEBUG [Server] - Set receive timeout to None
+15/04/2021 09:35:55 DEBUG [Client] - Set reload time to 0.1
+15/04/2021 09:35:55 DEBUG [Client] - Set receive timeout to None
+15/04/2021 09:35:55 INFO [Server] - Server listen...
+15/04/2021 09:35:56 INFO [Client] - Connect to server ('127.0.0.1', 9999) successfully
+15/04/2021 09:35:56 INFO [Server] - Server accept ('127.0.0.1', 34261)
+15/04/2021 09:35:56 DEBUG [Client] - Transform to STCP Socket ('127.0.0.1', 9999)
+15/04/2021 09:35:56 DEBUG [STCP Socket ('127.0.0.1', 34261)] - Initialized with cipher AES_CTR
+15/04/2021 09:35:56 DEBUG [STCP Socket ('127.0.0.1', 9999)] - Set timeout to 0.1
+15/04/2021 09:35:56 DEBUG [STCP Socket ('127.0.0.1', 34261)] - Set reload time to 0.1
+15/04/2021 09:35:56 DEBUG [STCP Socket ('127.0.0.1', 34261)] - Set receive timeout to None
+15/04/2021 09:35:56 INFO [STCP Socket ('127.0.0.1', 9999)] - Start automatically receiving...
+15/04/2021 09:35:56 INFO [STCP Socket ('127.0.0.1', 34261)] - Start automatically receiving...
+15/04/2021 09:35:57 INFO [STCP Socket ('127.0.0.1', 34261)] - Automatic receiving closes normally (remote socket closed)
+15/04/2021 09:35:57 INFO [STCP Socket ('127.0.0.1', 34261)] - Stop automatic receiving...
+15/04/2021 09:35:57 INFO [STCP Socket ('127.0.0.1', 9999)] - Automatic receiving closes normally (remote socket closed)
+15/04/2021 09:35:57 INFO [STCP Socket ('127.0.0.1', 9999)] - Stop automatic receiving...
+15/04/2021 09:35:57 INFO [STCP Socket ('127.0.0.1', 34261)] - Closed
+25/04/2021 00:23:48 DEBUG [Server] - Initialized with cipher AES_CTR
+25/04/2021 00:23:48 DEBUG [Client] - Initialized with cipher AES_CTR
+25/04/2021 00:23:48 DEBUG [Client] - Set reload time to 0.1
+25/04/2021 00:23:48 DEBUG [Client] - Set receive timeout to None
+25/04/2021 00:23:48 DEBUG [Server] - Set reload time to 0.1
+25/04/2021 00:23:48 DEBUG [Server] - Set receive timeout to None
+25/04/2021 00:23:48 INFO [Server] - Server listen...
+25/04/2021 00:23:48 INFO [Client] - Connect to server ('127.0.0.1', 9999) successfully
+25/04/2021 00:23:48 INFO [Server] - Server accept ('127.0.0.1', 17564)
+25/04/2021 00:23:48 DEBUG [Client] - Transform to STCP Socket ('127.0.0.1', 9999)
+25/04/2021 00:23:48 DEBUG [STCP Socket ('127.0.0.1', 17564)] - Initialized with cipher AES_CTR
+25/04/2021 00:23:48 DEBUG [STCP Socket ('127.0.0.1', 9999)] - Set timeout to 0.1
+25/04/2021 00:23:48 DEBUG [STCP Socket ('127.0.0.1', 17564)] - Set reload time to 0.1
+25/04/2021 00:23:48 DEBUG [STCP Socket ('127.0.0.1', 17564)] - Set receive timeout to None
+25/04/2021 00:23:48 INFO [STCP Socket ('127.0.0.1', 9999)] - Start automatically receiving...
+25/04/2021 00:23:48 INFO [STCP Socket ('127.0.0.1', 17564)] - Start automatically receiving...
+25/04/2021 00:23:49 INFO [STCP Socket ('127.0.0.1', 17564)] - Closed
+25/04/2021 00:23:49 INFO [STCP Socket ('127.0.0.1', 17564)] - Automatic receiving closes normally (remote socket closed)
+25/04/2021 00:23:49 INFO [STCP Socket ('127.0.0.1', 17564)] - Stop automatic receiving...
+25/04/2021 00:23:49 INFO [STCP Socket ('127.0.0.1', 9999)] - Automatic receiving closes normally (remote socket closed)
+25/04/2021 00:23:49 INFO [STCP Socket ('127.0.0.1', 9999)] - Stop automatic receiving...
+25/04/2021 00:37:21 DEBUG [Server] - Initialized with cipher AES_CTR.
+25/04/2021 00:37:21 DEBUG [Server] - Set reload time to 0.1s.
+25/04/2021 00:37:21 DEBUG [Client] - Initialized with cipher AES_CTR.
+25/04/2021 00:37:21 DEBUG [Server] - Set receive timeout to Nones.
+25/04/2021 00:37:21 DEBUG [Client] - Set reload time to 0.1s.
+25/04/2021 00:37:21 DEBUG [Client] - Set receive timeout to Nones.
+25/04/2021 00:37:21 INFO [Server] - Server listen...
+25/04/2021 00:37:22 INFO [Client] - Connect to server ('127.0.0.1', 9999) successfully.
+25/04/2021 00:37:22 INFO [Server] - Server accept ('127.0.0.1', 17835).
+25/04/2021 00:37:22 DEBUG [Client] - Transform to STCP Socket ('127.0.0.1', 9999).
+25/04/2021 00:37:22 DEBUG [STCP Socket ('127.0.0.1', 17835)] - Initialized with cipher AES_CTR.
+25/04/2021 00:37:22 DEBUG [STCP Socket ('127.0.0.1', 9999)] - Set timeout to 0.1s.
+25/04/2021 00:37:22 DEBUG [STCP Socket ('127.0.0.1', 17835)] - Set reload time to 0.1s.
+25/04/2021 00:37:22 DEBUG [STCP Socket ('127.0.0.1', 17835)] - Set receive timeout to Nones.
+25/04/2021 00:37:22 INFO [STCP Socket ('127.0.0.1', 9999)] - Start automatically receiving...
+25/04/2021 00:37:22 INFO [STCP Socket ('127.0.0.1', 17835)] - Start automatically receiving...
+25/04/2021 00:37:23 INFO [STCP Socket ('127.0.0.1', 17835)] - Automatic receiving closes normally (remote socket closed).
+25/04/2021 00:37:23 INFO [STCP Socket ('127.0.0.1', 17835)] - Closed.
+25/04/2021 00:37:23 INFO [STCP Socket ('127.0.0.1', 9999)] - Automatic receiving closes normally (remote socket closed).
+25/04/2021 00:37:23 INFO [STCP Socket ('127.0.0.1', 17835)] - Stop automatic receiving...
+25/04/2021 00:37:23 INFO [STCP Socket ('127.0.0.1', 9999)] - Stop automatic receiving...
