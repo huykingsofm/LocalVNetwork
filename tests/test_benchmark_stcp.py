@@ -3,9 +3,12 @@ import time
 import threading
 from hks_pynetwork.external import STCPSocket
 from hks_pylib.cryptography.ciphers.symmetrics import AES_CTR, AES_CBC
-from hks_pylib.logger import StandardLoggerGenerator
+from hks_pylib.logger import StandardLoggerGenerator, Display
+from hks_pylib.logger.standard import StdUsers
  
+
 logger_generator = StandardLoggerGenerator("tests/test_benchmark_stcp.log")
+
 KEY = os.urandom(32)
 
 SIZE_OF_DATA = 10**7
@@ -19,7 +22,7 @@ def server():
         name="Server",
         buffer_size=10**6,
         logger_generator=logger_generator,
-        display={"user": ["warning", "info"], "dev": ["info", "warning", "error", "debug"]}
+        display={StdUsers.USER: Display.ALL, StdUsers.DEV: Display.ALL}
     )
 
     server.bind(("127.0.0.1", 9999))
@@ -39,7 +42,7 @@ def client():
         name="Client",
         buffer_size=10**6,
         logger_generator=logger_generator,
-        display={"user": ["warning", "info"], "dev": ["info", "warning", "error", "debug"]}
+        display={StdUsers.USER: Display.ALL, StdUsers.DEV: Display.ALL}
     )
     client.connect(("127.0.0.1", 9999))
 
@@ -59,6 +62,7 @@ def test_client_server():
     t2.start()
     t1.join()
     t2.join()
+
 
 if __name__ == "__main__":
     client()

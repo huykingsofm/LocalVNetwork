@@ -1,5 +1,6 @@
 import os
-import pytest
+from hks_pylib.logger.standard import StdUsers
+from hks_pylib.logger import Display
 import random
 import threading
 from hks_pynetwork.external import STCPSocket
@@ -19,7 +20,7 @@ def server():
         name="Server",
         buffer_size=1024,
         logger_generator=logger_generator,
-        display={"user": ["warning", "info"], "dev": ["info", "warning", "error", "debug"]}
+        display={StdUsers.USER: Display.ALL, StdUsers.DEV: Display.ALL}
     )
 
     server.bind(("127.0.0.1", 9999))
@@ -46,7 +47,7 @@ def client():
         name="Client",
         buffer_size=1024,
         logger_generator=logger_generator,
-        display={"user": ["warning", "info"], "dev": ["info", "warning", "error", "debug"]}
+        display={StdUsers.USER: Display.ALL, StdUsers.DEV: Display.ALL}
     )
     client.connect(("127.0.0.1", 9999))
 

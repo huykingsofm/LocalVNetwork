@@ -2,17 +2,24 @@ import struct
 
 from hks_pylib.cryptography.ciphers.hkscipher import HKSCipher
 from hks_pylib.cryptography.ciphers.cipherid import CipherID, hash_cls_name
+from hkserror.hkserror import HTypeError
 
 from hks_pynetwork.packet import MIN_HEADER_SIZE, PacketEncoder, PacketDecoder
 
-from hks_pynetwork.errors.secure_packet import CipherTypeMismatchError
+from hks_pynetwork.errors.secure_packet import CipherTypeMismatchError, SecurePacketError
  
 
 class SecurePacketEncoder(PacketEncoder):
     def __init__(self, cipher: HKSCipher):
+        if not isinstance(cipher, HKSCipher):
+            raise HTypeError("cipher", cipher, HKSCipher)
+
         self.cipher = cipher
 
     def encode(self, payload: bytes):
+        if not isinstance(payload, bytes):
+            raise HTypeError("payload", payload, bytes)
+
         payload = self.cipher.encrypt(payload)
         packet = super().encode(payload)
 
@@ -26,7 +33,8 @@ class SecurePacketEncoder(PacketEncoder):
         for i in range(self.cipher._number_of_params):
             param = self.cipher.get_param(i)
 
-            assert isinstance(param, bytes)
+            if not isinstance(param, bytes):
+                raise SecurePacketError("Paramter of cipher must be bytes object.")
 
             param_size = len(param)
             param_struct = "B{}s".format(param_size)
@@ -48,9 +56,15 @@ class SecurePacketEncoder(PacketEncoder):
 
 class SecurePacketDecoder(PacketDecoder):
     def __init__(self, cipher: HKSCipher):
+        if not isinstance(cipher, HKSCipher):
+            raise HTypeError("cipher", cipher, HKSCipher)
+
         self.cipher = cipher
 
     def decode(self, packet: bytes):
+        if not isinstance(packet, bytes):
+            raise HTypeError("packet", packet, bytes)
+
         packet_dict = super().decode(packet)
 
         # ORIGINAL HEADER = HEADER_SIZE (2 bytes) + PAYLOAD_SIZE (2 byte)

@@ -2,12 +2,19 @@ from hks_pynetwork.errors import HKSPyNetworkError
 
 
 class InternalError(HKSPyNetworkError):
-    "Exception is raised by failures in internal module."
+    "The exception is raised by failures in internal module."
 
 
-class ChannelSlotError(InternalError):
-    "Exception is raised when an error occurs due to slot."
+class ChannelError(InternalError):
+    "The exception is raised by failures in channel."
 
 
-class ChannelClosedError(InternalError):
-    "Exception is raised when the method is working after channel closing."
+class ChannelSlotError(ChannelError):
+    "The exception is raised when an error occurs due to slot."
+
+
+class ChannelClosedError(ChannelError):
+    "The exception is raised when the method is working after channel closing."
+
+class ForwardNodeError(ChannelError):
+    "The exception is raised by failures in forwarder."

@@ -1,6 +1,9 @@
 import os
 import random
 import threading
+from hks_pylib.logger.logger import Display
+
+from hks_pylib.logger.standard import StdUsers
 
 from hks_pynetwork.internal import LocalNode, ForwardNode
 from hks_pylib.logger import StandardLoggerGenerator
@@ -18,7 +21,7 @@ def node1():
     node = LocalNode(
         name="NODE1",
         logger_generator=logger_generator,
-        display={"user": ["warning", "info"], "dev": ["info", "warning", "error", "debug"]}
+        display={StdUsers.USER: Display.ALL, StdUsers.DEV: Display.ALL}
     )
 
     err = None
@@ -37,7 +40,7 @@ def node2():
     node = LocalNode(
         name="NODE2",
         logger_generator=logger_generator,
-        display={"user": ["warning", "info"], "dev": ["info", "warning", "error", "debug"]}
+        display={StdUsers.USER: Display.ALL, StdUsers.DEV: Display.ALL}
     )
 
     err = None
@@ -66,7 +69,7 @@ def server():
         name="Server",
         buffer_size=1024,
         logger_generator=logger_generator,
-        display={"user": ["warning", "info"], "dev": ["info", "warning", "error", "debug"]}
+        display={StdUsers.USER: Display.ALL, StdUsers.DEV: Display.ALL}
     )
 
     server.bind(("127.0.0.1", 19999))
@@ -93,14 +96,14 @@ def client():
         name="Client",
         buffer_size=1024,
         logger_generator=logger_generator,
-        display={"user": ["warning", "info"], "dev": ["info", "warning", "error", "debug"]}
+        display={StdUsers.USER: Display.ALL, StdUsers.DEV: Display.ALL}
     )
     client.connect(("127.0.0.1", 19999))
     
     node = LocalNode(
         "CLIENT",
         logger_generator,
-        display={"user": ["warning", "info"], "dev": ["info", "warning", "error", "debug"]}
+        display={StdUsers.USER: Display.ALL, StdUsers.DEV: Display.ALL}
     )
     forwarder = ForwardNode(
         node=node,
@@ -108,7 +111,7 @@ def client():
         name="Forwarder of client",
         implicated_die=True,
         logger_generator=logger_generator,
-        display={"user": ["warning", "info"], "dev": ["info", "warning", "error", "debug"]}
+        display={StdUsers.USER: Display.ALL, StdUsers.DEV: Display.ALL}
     )
     threading.Thread(target=forwarder.start).start()
 
