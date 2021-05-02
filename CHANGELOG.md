@@ -2,7 +2,7 @@
 ## Version 0.0.4
 + Change .gitignore to Python template.
 + Synchronize with `hks_pylib` version 0.0.6.
-+ Fix typo..
++ Fix typo.
 + Change many error type and replace some of them to `hkserror`.
 + Future work:
     - Fix the error when a packet with invalid header (invalid or spoof size field).
