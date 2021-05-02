@@ -1,9 +1,12 @@
 import threading
 
 from hks_pylib.logger import LoggerGenerator
+from hks_pylib.logger.logger_generator import InvisibleLoggerGenerator
+from hks_pylib.logger.standard import StdLevels, StdUsers
+from hkserror.hkserror import HTypeError
 from hks_pynetwork.secure_packet import PacketDecoder
 
-from hks_pynetwork.errors.packet import IncompletePacketError
+from hks_pynetwork.errors.packet import IncompletePacketError, PacketSizeError
 from hks_pynetwork.errors.secure_packet import CipherTypeMismatchError
 
 
@@ -12,10 +15,14 @@ class PacketBuffer():
                     self,
                     decoder: PacketDecoder,
                     name: str,
-                    logger_generator: LoggerGenerator,
-                    display: dict
+                    logger_generator: LoggerGenerator = InvisibleLoggerGenerator(),
+                    display: dict = {}
                 ) -> None:
-        assert isinstance(decoder, PacketDecoder)
+        if not isinstance(decoder, PacketDecoder):
+            raise HTypeError("decoder", decoder, PacketDecoder)
+
+        if name is not None and not isinstance(name, str):
+            raise HTypeError("name", name, str, None)
 
         self._buffer = []
 
@@ -30,6 +37,12 @@ class PacketBuffer():
         self._push_lock = threading.Lock()
 
     def push(self, packet: bytes, append_to_end: bool = True):
+        if not isinstance(packet, bytes):
+            raise HTypeError("packet", packet, bytes)
+
+        if not isinstance(append_to_end, bool):
+            raise HTypeError("append_to_end", append_to_end, bool)
+
         self._push_lock.acquire()
 
         if append_to_end:
@@ -61,10 +74,14 @@ class PacketBuffer():
                     packet_dict["payload_size"] + packet_dict["header_size"]
             except IncompletePacketError:
                 return b""
-            except Exception as e:
-                self.__print("dev", "error", "Unknown error occurs "
-                "when decode a packet ({}).".format(repr(e)))
-                raise e
+            except PacketSizeError:
+                self.__print(StdUsers.DEV, StdLevels.WARNING, "Detect an "
+                "abnormal packet (invalid size).")
+
+                self._current_packet = b""
+                self._current_packet_size = 0
+                self._expected_current_packet_size = 0
+                return b""
 
         if self._current_packet_size < self._expected_current_packet_size:
             return b""
@@ -72,14 +89,15 @@ class PacketBuffer():
         try:
             packet_dict = self._packet_decoder.decode(self._current_packet)
         except CipherTypeMismatchError as e:
-            raise e
+            self.__print(StdUsers.DEV, StdLevels.WARNING, "Detect an "
+            "abnormal packet ({}).".format(e))
         finally:
             if  self._current_packet_size > self._expected_current_packet_size:
                 apart_of_next_packet = self._current_packet[
                         self._expected_current_packet_size :
                     ]
                 self.push(apart_of_next_packet, append_to_end=False)
- 
+
             self._current_packet = b""
             self._current_packet_size = 0
             self._expected_current_packet_size = 0
