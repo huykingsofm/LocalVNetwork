@@ -103,7 +103,7 @@ class STCPSocket(object):
                     self._log(StdUsers.DEV, StdLevels.INFO, "Automatic received "
                     "process closed normally (timeout and socket closed).")
                     break
-                elif isinstance(e, OSError) and e.errno == 10038:
+                elif isinstance(e, OSError) and e.errno in (10038, 9):
                     self._log(StdUsers.DEV, StdLevels.INFO, "Automatic received "
                     "process closed normally (remote socket closed).")
                     break
