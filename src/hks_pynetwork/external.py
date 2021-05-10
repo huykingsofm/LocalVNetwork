@@ -174,16 +174,6 @@ class STCPSocket(object):
 
             try:
                 data = self.__buffer.pop()
-            except IncompletePacketError as e:
-                # Not enough length of packet, waiting more data
-                continue
-            except (UnAuthenticatedPacketError,
-                    CipherParameterError,
-                    CipherTypeMismatchError) as e:
-                self._log(StdUsers.USER, StdLevels.WARNING, "Detect an abnormal packet.")
-                self._log(StdUsers.DEV, StdLevels.WARNING, "Detect an abnormal packet "
-                "({}).".format(e))
-                break
             except Exception as e:
                 self._log(StdUsers.USER, StdLevels.INFO, "Unknown error.")
                 self._log(StdUsers.DEV, StdLevels.ERROR, "Unknown error "

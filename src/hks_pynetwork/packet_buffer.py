@@ -91,6 +91,7 @@ class PacketBuffer():
         except CipherTypeMismatchError as e:
             self.__print(StdUsers.DEV, StdLevels.WARNING, "Detect an "
             "abnormal packet ({}).".format(e))
+            return b""
         finally:
             if  self._current_packet_size > self._expected_current_packet_size:
                 apart_of_next_packet = self._current_packet[

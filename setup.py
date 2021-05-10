@@ -30,7 +30,7 @@ setuptools.setup(
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
     python_requires=">=3.7.1",
-    install_requires=["hks_pylib==0.0.6", "hkserror==0.0.1"],
+    install_requires=["hks_pylib>=0.0.6", "hkserror>=0.0.1"],
     setup_requires=["pytest-runner==4.4"],
     tests_require=["pytest==4.4.1", "pytest-parallel==0.1.0"],
     test_suite="tests",

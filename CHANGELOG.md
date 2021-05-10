@@ -1,4 +1,8 @@
 # Change log
+## Version 0.0.5
++ Modify error catching in `external` module.
++ Change packet dependencies.
+
 ## Version 0.0.4
 + Change .gitignore to Python template.
 + Synchronize with `hks_pylib` version 0.0.6.
